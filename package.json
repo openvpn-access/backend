@@ -7,7 +7,7 @@
     "author": "Simon Reinisch <trash@reinisch.io>",
     "license": "MIT",
     "scripts": {
-        "build": "run-p build:ts build:templates",
+        "build": "tsc",
         "start": "tsc && node dist/index.js",
         "dev": "ts-node-dev --respawn --transpileOnly src/index.ts",
         "lint:ts": "eslint src/**/*.{js,ts,tsx} src/**/*.{js,ts,tsx}",
