@@ -1,6 +1,8 @@
 {
     "server": {
-        "port": 8080
+        "host": "localhost",
+        "port": 8080,
+        "apiEndpoint": "/api"
     },
     "logs": {
         "logUserAgent": true,

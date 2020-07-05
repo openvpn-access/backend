@@ -7,7 +7,8 @@ import {LogLevel} from './logging';
 type Config = {
     server: {
         port: number;
-        api: string;
+        host: string;
+        apiEndpoint: string;
     };
 
     logs: {
