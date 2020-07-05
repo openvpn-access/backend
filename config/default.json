@@ -1,0 +1,15 @@
+{
+    "server": {
+        "port": 8080
+    },
+    "logs": {
+        "logUserAgent": true,
+        "logLevels": [
+            "FATAL",
+            "ERROR",
+            "WARNING",
+            "INFO",
+            "DEBUG"
+        ]
+    }
+}
