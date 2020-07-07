@@ -12,7 +12,7 @@ USE openvpn_access;
 CREATE TABLE user (
     id int NOT NULL AUTO_INCREMENT,
     created_at date NOT NULL DEFAULT CURDATE(),
-    updated_at date NOT NULL DEFAULT CURDATE(),
+    updated_at date NOT NULL DEFAULT CURRENT_TIMESTAMP(), # Gets truncated to date, that's ok
 
     # Administrator will have access to user-management, normal user
     # will only be able to change their credentials and view stats.

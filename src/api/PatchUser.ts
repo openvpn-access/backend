@@ -44,8 +44,7 @@ export const patchUser = (server: Server): void => {
                 UPDATE user
                     SET username = (?),
                         email = (?),
-                        password = (?),
-                        updated_at = CURDATE()
+                        password = (?)
                     WHERE username = (?);
             `, [username, email, newPassword, username]);
 
