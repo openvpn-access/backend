@@ -20,6 +20,7 @@ export const login = (server: Server): void => {
                 payload: Joi.object({
                     id: Joi.string().required(),
                     password: Joi.string().required()
+                    // TODO: Login using a token?
                 })
             }
         },
@@ -52,7 +53,8 @@ export const login = (server: Server): void => {
                 SELECT COUNT(*) AS count
                     FROM login_attempt_web
                         WHERE username = (?)
-                        AND created BETWEEN DATE_SUB(CURDATE(), INTERVAL (?) SECOND) AND CURDATE();
+                            AND state = 'fail'
+                            AND created BETWEEN DATE_SUB(CURDATE(), INTERVAL (?) SECOND) AND CURDATE();
             `, [id, config.security.loginAttemptsTimeRange]);
 
             if (!loginAttempts || loginAttempts[0].count >= config.security.loginAttempts) {
