@@ -25,6 +25,7 @@ export const login = (server: Server): void => {
         },
         async handler(req, rt) {
             const {id, password} = req.payload as LoginPayload;
+            const ipAddr = req.info.remoteAddress;
             const users = await query(`
                 SELECT * FROM user
                     WHERE username = (?)
@@ -33,6 +34,12 @@ export const login = (server: Server): void => {
 
             // Not found
             if (!users.length) {
+
+                // Save login attempt
+                await query(`
+                    INSERT INTO login_attempt_web (state, username, ip_addr)
+                        VALUES ((?), (?), (?))
+                `, ['fail', id, ipAddr]);
 
                 // TODO: Move error handler to module
                 return rt.response({
@@ -51,12 +58,24 @@ export const login = (server: Server): void => {
                         VALUES ((?), (?))
                 `, [user.id, sessionKey]);
 
+                // Save login attempt
+                await query(`
+                    INSERT INTO login_attempt_web (user_id, state, username, ip_addr)
+                        VALUES ((?), (?), (?), (?))
+                `, [user.id, 'pass', id, ipAddr]);
+
                 // Okay
                 return {
                     key: sessionKey,
                     user: pick(user, ['type', 'state', 'email', 'username'])
                 };
             }
+
+            // Save login attempt
+            await query(`
+                    INSERT INTO login_attempt_web (user_id, state, username, ip_addr)
+                        VALUES ((?), (?), (?), (?))
+                `, [user.id, 'fail', id, ipAddr]);
 
             // Forbidden
             return rt.response({
