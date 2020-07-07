@@ -4,9 +4,15 @@ import {config} from './config';
 import {log, LogLevel} from './logging';
 
 (async () => {
+    const isDev = process.env.NODE_ENV === 'development';
     const server = Hapi.server({
         port: config.server.port,
-        host: config.server.host
+        host: config.server.host,
+        routes: {
+            cors: {
+                origin: isDev ? ['*'] : null
+            }
+        }
     });
 
     await launchAPI(server);

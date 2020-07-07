@@ -4,6 +4,16 @@
         "port": 8080,
         "apiEndpoint": "/api"
     },
+    "db": {
+        "host": "localhost",
+        "user": "root",
+        "password": "password",
+        "database": "openvpn_access"
+    },
+    "security": {
+        "saltRounds": 10,
+        "apiKeySize": 64
+    },
     "logs": {
         "logUserAgent": true,
         "logLevels": [

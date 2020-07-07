@@ -24,6 +24,8 @@ export const secureUid = async (length: number): Promise<string> => {
         const next = await randomBytesAsync((length * 1.5) >>> 0);
 
         if (next === undefined) {
+
+            // TODO: Log?
             return uid(length);
         }
 

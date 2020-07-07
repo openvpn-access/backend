@@ -70,7 +70,7 @@ export const log = <T extends keyof Events>(
             }
         }
 
-        process.stdout.write(`${msg.slice(0, -2)}}`);
+        process.stdout.write(`${msg.endsWith(', }') ? msg.slice(0, -2) : msg}}`);
         process.stdout.write('\n');
     }
 };

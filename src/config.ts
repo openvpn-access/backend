@@ -11,6 +11,18 @@ type Config = {
         apiEndpoint: string;
     };
 
+    db: {
+        host: string;
+        user: string;
+        password: string;
+        database: string;
+    };
+
+    security: {
+        saltRounds: number;
+        apiKeySize: number;
+    };
+
     logs: {
         logUserAgent: boolean;
         logLevels: Array<LogLevel>;
