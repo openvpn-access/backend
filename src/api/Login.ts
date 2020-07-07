@@ -11,15 +11,20 @@ type LoginPayload = {
     id: string;
 };
 
+// TODO: Use Boom
+// TODO: Create db api wrapper?
+// TODO: Add ip_addr to user session?
 export const login = (server: Server): void => {
     server.route({
         method: 'POST',
         path: '/login',
         options: {
+            auth: false,
             validate: {
                 payload: Joi.object({
                     id: Joi.string().required(),
                     password: Joi.string().required()
+
                     // TODO: Login using a token?
                 })
             }
@@ -54,7 +59,7 @@ export const login = (server: Server): void => {
                     FROM login_attempt_web
                         WHERE username = (?)
                             AND state = 'fail'
-                            AND created BETWEEN DATE_SUB(CURDATE(), INTERVAL (?) SECOND) AND CURDATE();
+                            AND created_at BETWEEN DATE_SUB(CURDATE(), INTERVAL (?) SECOND) AND CURDATE();
             `, [id, config.security.loginAttemptsTimeRange]);
 
             if (!loginAttempts || loginAttempts[0].count >= config.security.loginAttempts) {
@@ -70,11 +75,11 @@ export const login = (server: Server): void => {
             if (await bcrypt.compare(password, user.password)) {
 
                 // Create session key and add session
-                const sessionKey = await secureUid(config.security.apiKeySize);
+                const token = await secureUid(config.security.apiKeySize);
                 await query(`
-                    INSERT INTO user_session (user_id, session_key)
+                    INSERT INTO user_session (user_id, token)
                         VALUES ((?), (?))
-                `, [user.id, sessionKey]);
+                `, [user.id, token]);
 
                 // Save login attempt
                 await query(`
@@ -84,7 +89,7 @@ export const login = (server: Server): void => {
 
                 // Okay
                 return {
-                    key: sessionKey,
+                    token,
                     user: pick(user, ['type', 'state', 'email', 'username'])
                 };
             }

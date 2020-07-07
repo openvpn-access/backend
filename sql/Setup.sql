@@ -11,8 +11,8 @@ USE openvpn_access;
 #DROP TABLE IF EXISTS user;
 CREATE TABLE user (
     id int NOT NULL AUTO_INCREMENT,
-    created date NOT NULL DEFAULT CURDATE(),
-    updated date NOT NULL DEFAULT CURDATE(),
+    created_at date NOT NULL DEFAULT CURDATE(),
+    updated_at date NOT NULL DEFAULT CURDATE(),
 
     # Administrator will have access to user-management, normal user
     # will only be able to change their credentials and view stats.
@@ -39,7 +39,7 @@ CREATE TABLE user (
 CREATE TABLE login_attempt_web (
     id int NOT NULL AUTO_INCREMENT,
     user_id int DEFAULT null,
-    created date NOT NULL DEFAULT CURDATE(),
+    created_at date NOT NULL DEFAULT CURDATE(),
 
     # Staet, tried username and ip address
     state enum ('pass', 'fail') NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE login_attempt_web (
 CREATE TABLE login_attempt_vpn (
     id int NOT NULL AUTO_INCREMENT,
     user_id int DEFAULT null,
-    created date NOT NULL DEFAULT CURDATE(),
+    created_at date NOT NULL DEFAULT CURDATE(),
 
     # Reason, tried username and ip address
     state enum ('empty_cred', 'bad_password', 'eof', 'no_user', 'pass') NOT NULL,
@@ -82,13 +82,10 @@ CREATE TABLE login_attempt_vpn (
 CREATE TABLE user_session (
     id int NOT NULL AUTO_INCREMENT,
     user_id int NOT NULL,
-    created date NOT NULL DEFAULT CURDATE(),
-
-    # Start date of session
-    start_date date NOT NULL DEFAULT CURDATE(),
+    created_at date NOT NULL DEFAULT CURDATE(),
 
     # Session key
-    session_key tinytext,
+    token tinytext,
 
     # Constraints
     PRIMARY KEY (id),
@@ -108,8 +105,8 @@ CREATE TABLE vpn_session (
     ip_addr tinytext NOT NULL,
 
     # Time range of connection
-    start_date date NOT NULL DEFAULT CURDATE(),
-    end_date date DEFAULT null,
+    created_at date NOT NULL DEFAULT CURDATE(),
+    closed_at date DEFAULT null,
 
     # Total amount of bytes transferred during this session
     transferred bigint unsigned NOT NULL DEFAULT 0,

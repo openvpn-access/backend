@@ -1,6 +1,7 @@
 import {Server} from 'hapi';
 import {config} from '../config';
 import {login} from './Login';
+import {patchUser} from './PatchUser';
 
 /**
  * This function takes care of registering all the important,
@@ -14,6 +15,7 @@ export const launchAPI = async (server: Server): Promise<unknown> => {
 
             // Register api endpoints
             login(server);
+            patchUser(server);
         }
     }, {
         routes: {

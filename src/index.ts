@@ -1,11 +1,13 @@
 import Hapi from '@hapi/hapi';
+import {Server} from 'hapi';
 import {launchAPI} from './api';
+import {implementBearerScheme} from './auth';
 import {config} from './config';
 import {log, LogLevel} from './logging';
 
 (async () => {
     const isDev = process.env.NODE_ENV === 'development';
-    const server = Hapi.server({
+    const server: Server = Hapi.server({
         port: config.server.port,
         host: config.server.host,
         routes: {
@@ -14,6 +16,9 @@ import {log, LogLevel} from './logging';
             }
         }
     });
+
+    // Register authentication scheme
+    implementBearerScheme(server);
 
     await launchAPI(server);
     log('booting', {
