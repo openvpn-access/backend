@@ -8,8 +8,9 @@ import {pick} from '../utils/pick';
 import {secureUid} from '../utils/uid';
 
 type LoginPayload = {
-    password: string;
-    id: string;
+    password?: string;
+    id?: string;
+    token?: string;
 };
 
 export const login = (server: Server): void => {
@@ -20,15 +21,34 @@ export const login = (server: Server): void => {
             auth: false,
             validate: {
                 payload: Joi.object({
-                    id: Joi.string().required(),
-                    password: Joi.string().required()
-
-                    // TODO: Login using a token?
-                })
+                    id: Joi.string(),
+                    password: Joi.string(),
+                    token: Joi.string()
+                }).xor('id', 'token').xor('password', 'token')
             }
         },
         async handler(req) {
-            const {id, password} = req.payload as LoginPayload;
+            const {id, password, token} = req.payload as LoginPayload;
+
+            // Try loggin in using the token
+            if (token) {
+                const res = await query(`
+                    SELECT u.*
+                        FROM user u, user_session us
+                        WHERE token = (?)
+                        LIMIT 1
+                `, [token]);
+
+                if (res.length) {
+                    return {
+                        token,
+                        user: pick(res[0], ['type', 'state', 'email', 'username'])
+                    };
+                }
+
+                return Boom.unauthorized('Invalid token');
+            }
+
             const ipAddr = req.info.remoteAddress;
             const users = await query(`
                 SELECT * FROM user
