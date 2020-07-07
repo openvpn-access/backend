@@ -1,5 +1,6 @@
 import {Server} from 'hapi';
 import Joi from '@hapi/joi';
+import Boom from '@hapi/boom';
 import bcrypt from 'bcrypt';
 import {config} from '../config';
 import {query} from '../db';
@@ -11,7 +12,6 @@ type LoginPayload = {
     id: string;
 };
 
-// TODO: Use Boom
 // TODO: Create db api wrapper?
 // TODO: Add ip_addr to user session?
 export const login = (server: Server): void => {
@@ -29,7 +29,7 @@ export const login = (server: Server): void => {
                 })
             }
         },
-        async handler(req, rt) {
+        async handler(req) {
             const {id, password} = req.payload as LoginPayload;
             const ipAddr = req.info.remoteAddress;
             const users = await query(`
@@ -48,9 +48,7 @@ export const login = (server: Server): void => {
                 `, ['fail', id, ipAddr]);
 
                 // TODO: Move error handler to module
-                return rt.response({
-                    message: 'User not found'
-                }).code(404);
+                return Boom.notFound('User not found');
             }
 
             // Check if user exeeded the login-attempt limit
@@ -65,9 +63,7 @@ export const login = (server: Server): void => {
             if (!loginAttempts || loginAttempts[0].count >= config.security.loginAttempts) {
 
                 // Account locked
-                return rt.response({
-                    message: 'Account locked, try again later.'
-                }).code(423);
+                return Boom.locked('Account locked, try again later.');
             }
 
             // Compare passwords
@@ -101,9 +97,7 @@ export const login = (server: Server): void => {
                 `, [user.id, 'fail', id, ipAddr]);
 
             // Forbidden
-            return rt.response({
-                message: 'Invalid password'
-            }).code(403);
+            return Boom.forbidden('Invalid password');
         }
     });
 };
