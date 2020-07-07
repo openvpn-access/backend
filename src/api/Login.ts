@@ -12,8 +12,6 @@ type LoginPayload = {
     id: string;
 };
 
-// TODO: Create db api wrapper?
-// TODO: Add ip_addr to user session?
 export const login = (server: Server): void => {
     server.route({
         method: 'POST',
@@ -73,9 +71,9 @@ export const login = (server: Server): void => {
                 // Create session key and add session
                 const token = await secureUid(config.security.apiKeySize);
                 await query(`
-                    INSERT INTO user_session (user_id, token)
-                        VALUES ((?), (?))
-                `, [user.id, token]);
+                    INSERT INTO user_session (user_id, token, ip_addr)
+                        VALUES ((?), (?), (?))
+                `, [user.id, token, ipAddr]);
 
                 // Save login attempt
                 await query(`

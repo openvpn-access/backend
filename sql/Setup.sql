@@ -82,10 +82,11 @@ CREATE TABLE login_attempt_vpn (
 CREATE TABLE user_session (
     id int NOT NULL AUTO_INCREMENT,
     user_id int NOT NULL,
+    ip_addr tinytext NOT NULL,
     created_at date NOT NULL DEFAULT CURDATE(),
 
     # Session key
-    token tinytext,
+    token tinytext NOT NULL,
 
     # Constraints
     PRIMARY KEY (id),

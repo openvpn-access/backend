@@ -30,6 +30,7 @@ export type DBLoginAttemptVPN = DBEntry & {
 export type DBUserSession = DBEntry & {
     user_id: string;
     created_at: Date;
+    ip_addr: string;
     token: string;
 };
 
@@ -37,5 +38,6 @@ export type DBVPNSession = DBEntry & {
     user_id: string;
     created_at: Date;
     closed_at: Date;
+    ip_addr: string;
     transferred: number;
 };
