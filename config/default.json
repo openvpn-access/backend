@@ -12,7 +12,9 @@
     },
     "security": {
         "saltRounds": 10,
-        "apiKeySize": 64
+        "apiKeySize": 64,
+        "loginAttempts": 5,
+        "loginAttemptsTimeRange": 3600
     },
     "logs": {
         "logUserAgent": true,

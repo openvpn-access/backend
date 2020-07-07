@@ -21,6 +21,8 @@ type Config = {
     security: {
         saltRounds: number;
         apiKeySize: number;
+        loginAttempts: number;
+        loginAttemptsTimeRange: number;
     };
 
     logs: {

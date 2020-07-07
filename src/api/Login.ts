@@ -47,6 +47,22 @@ export const login = (server: Server): void => {
                 }).code(404);
             }
 
+            // Check if user exeeded the login-attempt limit
+            const loginAttempts = await query(`
+                SELECT COUNT(*) AS count
+                    FROM login_attempt_web
+                        WHERE username = (?)
+                        AND created BETWEEN DATE_SUB(CURDATE(), INTERVAL (?) SECOND) AND CURDATE();
+            `, [id, config.security.loginAttemptsTimeRange]);
+
+            if (!loginAttempts || loginAttempts[0].count >= config.security.loginAttempts) {
+
+                // Account locked
+                return rt.response({
+                    message: 'Account locked, try again later.'
+                }).code(423);
+            }
+
             // Compare passwords
             const [user] = users;
             if (await bcrypt.compare(password, user.password)) {
