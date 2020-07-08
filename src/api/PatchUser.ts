@@ -6,6 +6,7 @@ import {config} from '../config';
 import {query} from '../db';
 import {DBUser} from '../db/types';
 import {createError} from '../utils/error';
+import {STATUS} from '../utils/status';
 import isEmail = validator.isEmail;
 
 type PatchUserPayload = {
@@ -41,13 +42,13 @@ export const patchUser = (server: Server): void => {
 
             // TODO: Create universal schema validation class
             if (caller.username === 'admin' && username !== 'admin') {
-                return createError('The admin cannot change its username.', 403, 1);
+                return createError('The admin cannot change its username.', STATUS.FORBIDDEN, 1);
             } else if (!isEmail(email)) {
-                return createError('Invalid E-Mail.', 400, 3);
+                return createError('Invalid E-Mail.', STATUS.BAD_REQUEST, 3);
             } else if (!username.match(/^[\w]{1,50}$/)) {
-                return createError('Username can only contain alphanumeric characters and must have a length between 1 and 50.', 400, 4);
+                return createError('Username can only contain alphanumeric characters and must have a length between 1 and 50.', STATUS.BAD_REQUEST, 4);
             } else if (data.password && (data.password.length < 8 || data.password.length > 50)) {
-                return createError('Passwort must have a length between 8 and 50', 400, 5);
+                return createError('Passwort must have a length between 8 and 50', STATUS.BAD_GATEWAY, 5);
             }
 
             // Validate password
@@ -55,7 +56,7 @@ export const patchUser = (server: Server): void => {
                 !(currentPassword && await compare(currentPassword, caller.password)) ||
                 (caller.type === 'admin' && username !== 'admin' && data.password !== undefined)
             ) {
-                return createError('Invalid password', 403, 2);
+                return createError('Invalid password', STATUS.FORBIDDEN, 2);
             }
 
             // Update user in db
@@ -68,7 +69,7 @@ export const patchUser = (server: Server): void => {
                     WHERE id = (?);
             `, [username, email, newPassword, caller.id]); // TODO: Invalidate all sessions?
 
-            return rt.response().code(200);
+            return rt.response().code(STATUS.OK);
         }
     });
 };

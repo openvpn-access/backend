@@ -1,10 +1,11 @@
 import {Server} from 'hapi';
 import Joi from '@hapi/joi';
-import Boom from '@hapi/boom';
 import bcrypt from 'bcrypt';
 import {config} from '../config';
 import {query} from '../db';
+import {createError} from '../utils/error';
 import {omit, pick} from '../utils/pick';
+import {STATUS} from '../utils/status';
 import {secureUid} from '../utils/uid';
 
 type LoginPayload = {
@@ -46,7 +47,7 @@ export const login = (server: Server): void => {
                     };
                 }
 
-                return Boom.unauthorized('Invalid token');
+                return createError('Invalid token', STATUS.UNAUTHORIZED, 1);
             }
 
             const ipAddr = req.info.remoteAddress;
@@ -65,8 +66,7 @@ export const login = (server: Server): void => {
                         VALUES ((?), (?), (?))
                 `, ['fail', id, ipAddr]);
 
-                // TODO: Move error handler to module
-                return Boom.notFound('User not found');
+                return createError('User not found', STATUS.NOT_FOUND, 2);
             }
 
             // Check if user exeeded the login-attempt limit
@@ -81,7 +81,7 @@ export const login = (server: Server): void => {
             if (!loginAttempts || loginAttempts[0].count >= config.security.loginAttempts) {
 
                 // Account locked
-                return Boom.locked('Account locked, try again later.');
+                return createError('Account locked, try again later.', STATUS.LOCKED, 3);
             }
 
             // Compare passwords
@@ -115,7 +115,7 @@ export const login = (server: Server): void => {
                 `, [user.id, 'fail', id, ipAddr]);
 
             // Forbidden
-            return Boom.forbidden('Invalid password');
+            return createError('Invalid password', STATUS.UNAUTHORIZED, 4);
         }
     });
 };

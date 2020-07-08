@@ -1,4 +1,5 @@
 import {Boom} from '@hapi/boom';
+import {STATUS} from './status';
 
 export type APIError = {
     statusCode: number;
@@ -7,7 +8,7 @@ export type APIError = {
     id: number;
 };
 
-export const createError = (message: string, statusCode: number, errorId: number): Boom => {
+export const createError = (message: string, statusCode: STATUS, errorId: number): Boom => {
     const boom = new Boom(message, {statusCode});
 
     // Attach custom error id

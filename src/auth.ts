@@ -1,6 +1,7 @@
 import {Server} from 'hapi';
-import Boom from '@hapi/boom';
 import {query} from './db';
+import {createError} from './utils/error';
+import {STATUS} from './utils/status';
 
 const BAERER_REGEX = /Bearer +(.+?)( +|$)/;
 export const implementBearerScheme = (server: Server): void => {
@@ -14,7 +15,7 @@ export const implementBearerScheme = (server: Server): void => {
                 const match = BAERER_REGEX.exec(authorization);
 
                 if (!match) {
-                    return Boom.unauthorized('Missing baerer token');
+                    return createError('Missing baerer token', STATUS.BAD_REQUEST, 1);
                 }
 
                 const [, token] = match;
@@ -26,7 +27,7 @@ export const implementBearerScheme = (server: Server): void => {
                 `, [token]);
 
                 if (!res.length) {
-                    return Boom.unauthorized('Invalid baerer token');
+                    return createError('Invalid baerer token', STATUS.UNAUTHORIZED, 2);
                 }
 
                 return h.authenticated({
