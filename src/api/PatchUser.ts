@@ -1,15 +1,16 @@
 import {Server} from 'hapi';
 import Joi from '@hapi/joi';
-import Boom from '@hapi/boom';
-import {hash} from 'bcrypt';
+import bcrypt, {hash} from 'bcrypt';
 import {config} from '../config';
 import {query} from '../db';
 import {DBUser} from '../db/types';
+import {createError} from '../utils/error';
 
 type PatchUserPayload = {
     username?: string;
     email?: string;
     password?: string;
+    currentPassword: string;
 };
 
 export const patchUser = (server: Server): void => {
@@ -21,7 +22,8 @@ export const patchUser = (server: Server): void => {
                 payload: Joi.object({
                     username: Joi.string(),
                     email: Joi.string(),
-                    password: Joi.string()
+                    password: Joi.string(),
+                    currentPassword: Joi.string().required()
                 })
             }
         },
@@ -31,11 +33,17 @@ export const patchUser = (server: Server): void => {
             const {
                 username = user.username,
                 email = user.email,
-                password = user.password
+                password = user.password,
+                currentPassword
             } = req.payload as PatchUserPayload;
 
             if (user.username === 'admin' && username !== 'admin') {
-                return Boom.forbidden('The admin cannot change its username.');
+                return createError('The admin cannot change its username.', 403, 1);
+            }
+
+            // Validate password
+            if (!(await bcrypt.compare(currentPassword, user.password))) {
+                return createError('Invalid password', 403, 2);
             }
 
             // Update user in db
