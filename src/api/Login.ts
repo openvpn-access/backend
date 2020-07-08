@@ -4,7 +4,7 @@ import Boom from '@hapi/boom';
 import bcrypt from 'bcrypt';
 import {config} from '../config';
 import {query} from '../db';
-import {pick} from '../utils/pick';
+import {omit, pick} from '../utils/pick';
 import {secureUid} from '../utils/uid';
 
 type LoginPayload = {
@@ -42,7 +42,7 @@ export const login = (server: Server): void => {
                 if (res.length) {
                     return {
                         token,
-                        user: pick(res[0], ['type', 'state', 'email', 'username'])
+                        user: omit(res[0], ['password'])
                     };
                 }
 
