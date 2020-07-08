@@ -7,7 +7,22 @@ import {LogLevel} from './logging';
 type Config = {
     server: {
         port: number;
-        api: string;
+        host: string;
+        apiEndpoint: string;
+    };
+
+    db: {
+        host: string;
+        user: string;
+        password: string;
+        database: string;
+    };
+
+    security: {
+        saltRounds: number;
+        apiKeySize: number;
+        loginAttempts: number;
+        loginAttemptsTimeRange: number;
     };
 
     logs: {

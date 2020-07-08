@@ -1,6 +1,20 @@
 {
     "server": {
-        "port": 8080
+        "host": "localhost",
+        "port": 8080,
+        "apiEndpoint": "/api"
+    },
+    "db": {
+        "host": "localhost",
+        "user": "root",
+        "password": "password",
+        "database": "openvpn_access"
+    },
+    "security": {
+        "saltRounds": 10,
+        "apiKeySize": 64,
+        "loginAttempts": 5,
+        "loginAttemptsTimeRange": 3600
     },
     "logs": {
         "logUserAgent": true,
