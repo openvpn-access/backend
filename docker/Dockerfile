@@ -12,7 +12,7 @@ EXPOSE 8080
 RUN npm install
 RUN npm run build
 
-RUN ls /opt/app
+WORKDIR /opt/app/docker
 
 RUN chmod +x docker-entrypoint.sh
-ENTRYPOINT ["./docker-entrypoint.sh", "${MYSQL_ROOT_PASSWORD}"]
+ENTRYPOINT ./docker-entrypoint.sh ${MYSQL_PASSWORD}
