@@ -11,8 +11,10 @@ import {log, LogLevel} from './logging';
         port: config.server.port,
         host: config.server.host,
         routes: {
-            cors: {
-                origin: isDev ? ['*'] : null
+            cors: isDev && {
+                origin: ['*'],
+                additionalHeaders: ['Authorization'],
+                additionalExposedHeaders: ['Authorization']
             }
         }
     });
