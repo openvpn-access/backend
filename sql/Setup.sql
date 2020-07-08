@@ -23,6 +23,7 @@ CREATE TABLE user (
 
     # Credentials
     email varchar(320) NOT NULL UNIQUE, # See https://tools.ietf.org/html/rfc3696
+    email_verified bool NOT NULL DEFAULT false,
     username tinytext NOT NULL UNIQUE,
     password tinytext NOT NULL,
 
@@ -48,7 +49,7 @@ CREATE TABLE login_attempt_web (
 
     # Constraints
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES User (id)
+    FOREIGN KEY (user_id) REFERENCES user (id)
 ) ENGINE = INNODB,
   AUTO_INCREMENT = 1,
   CHARACTER SET utf8,
@@ -69,7 +70,7 @@ CREATE TABLE login_attempt_vpn (
 
     # Constraints
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES User (id)
+    FOREIGN KEY (user_id) REFERENCES user (id)
 ) ENGINE = INNODB,
   AUTO_INCREMENT = 1,
   CHARACTER SET utf8,
@@ -90,7 +91,7 @@ CREATE TABLE user_session (
 
     # Constraints
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES User (id)
+    FOREIGN KEY (user_id) REFERENCES user (id)
 ) ENGINE = INNODB,
   AUTO_INCREMENT = 1,
   CHARACTER SET utf8,
@@ -114,7 +115,7 @@ CREATE TABLE vpn_session (
 
     # Constraints
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES User (id)
+    FOREIGN KEY (user_id) REFERENCES user (id)
 ) ENGINE = INNODB,
   AUTO_INCREMENT = 1,
   CHARACTER SET utf8,
@@ -123,7 +124,7 @@ CREATE TABLE vpn_session (
 
 # ==== Create admin user with default password ==== #
 # This user is protected by a trigger and cannot get removed or its username changed.
-INSERT INTO User (type, state, email, username, password)
+INSERT INTO user (type, state, email, username, password)
 VALUES (
     'admin',
     'activated',
