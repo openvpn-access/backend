@@ -8,10 +8,9 @@ export type APIError = {
 };
 
 export const createError = (message: string, statusCode: number, errorId: number): Boom => {
-    const boom = new Boom();
-    const {output} = boom;
-    output.statusCode = statusCode;
-    (output.payload as APIError).message = message;
-    (output.payload as APIError).id = errorId;
+    const boom = new Boom(message, {statusCode});
+
+    // Attach custom error id
+    (boom.output.payload as APIError).id = errorId;
     return boom;
 };
