@@ -59,14 +59,14 @@ export const patchUser = (server: Server): void => {
                 return createError('Invalid password', STATUS.FORBIDDEN, 2);
             }
 
-            // Update user in db
+            // Update user in db TODO: Username already in use?
             const newPassword = data.password ? await hash(data.password, config.security.saltRounds) : caller.password;
             await query(`
                 UPDATE user
-                    SET username = (?),
-                        email = (?),
-                        password = (?)
-                    WHERE id = (?);
+                    SET username = ?,
+                        email = ?,
+                        password = ?
+                    WHERE id = ?;
             `, [username, email, newPassword, caller.id]); // TODO: Invalidate all sessions?
 
             return rt.response().code(STATUS.OK);

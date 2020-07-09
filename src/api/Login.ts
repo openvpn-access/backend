@@ -36,7 +36,7 @@ export const login = (server: Server): void => {
                 const res = await query(`
                     SELECT u.*
                         FROM user u, user_session us
-                        WHERE token = (?)
+                        WHERE token = ?
                         LIMIT 1
                 `, [token]);
 
@@ -53,7 +53,7 @@ export const login = (server: Server): void => {
             const ipAddr = req.info.remoteAddress;
             const users = await query(`
                 SELECT * FROM user
-                    WHERE username = (?)
+                    WHERE username = ?
                 LIMIT 1;
             `, [id]);
 
@@ -63,7 +63,7 @@ export const login = (server: Server): void => {
                 // Save login attempt
                 await query(`
                     INSERT INTO login_attempt_web (state, username, ip_addr)
-                        VALUES ((?), (?), (?))
+                        VALUES (?, ?, ?)
                 `, ['fail', id, ipAddr]);
 
                 return createError('User not found', STATUS.NOT_FOUND, 2);
@@ -73,9 +73,9 @@ export const login = (server: Server): void => {
             const loginAttempts = await query(`
                 SELECT COUNT(*) AS count
                     FROM login_attempt_web
-                        WHERE username = (?)
+                        WHERE username = ?
                             AND state = 'fail'
-                            AND created_at BETWEEN DATE_SUB(CURDATE(), INTERVAL (?) SECOND) AND CURDATE();
+                            AND created_at BETWEEN DATE_SUB(CURDATE(), INTERVAL ? SECOND) AND CURDATE();
             `, [id, config.security.loginAttemptsTimeRange]);
 
             if (!loginAttempts || loginAttempts[0].count >= config.security.loginAttempts) {
@@ -92,13 +92,13 @@ export const login = (server: Server): void => {
                 const token = await secureUid(config.security.apiKeySize);
                 await query(`
                     INSERT INTO user_session (user_id, token, ip_addr)
-                        VALUES ((?), (?), (?))
+                        VALUES (?, ?, ?)
                 `, [user.id, token, ipAddr]);
 
                 // Save login attempt
                 await query(`
                     INSERT INTO login_attempt_web (user_id, state, username, ip_addr)
-                        VALUES ((?), (?), (?), (?))
+                        VALUES (?, ?, ?, ?)
                 `, [user.id, 'pass', id, ipAddr]);
 
                 // Okay
@@ -111,7 +111,7 @@ export const login = (server: Server): void => {
             // Save login attempt
             await query(`
                     INSERT INTO login_attempt_web (user_id, state, username, ip_addr)
-                        VALUES ((?), (?), (?), (?))
+                        VALUES (?, ?, ?, ?)
                 `, [user.id, 'fail', id, ipAddr]);
 
             // Forbidden

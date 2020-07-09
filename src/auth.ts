@@ -22,7 +22,7 @@ export const implementBearerScheme = (server: Server): void => {
                 const res = await query(`
                     SELECT u.*
                         FROM user u, user_session us
-                        WHERE us.token = (?)
+                        WHERE us.token = ?
                         LIMIT 1
                 `, [token]);
 
