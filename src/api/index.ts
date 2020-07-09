@@ -1,6 +1,7 @@
 import {Server} from 'hapi';
 import {config} from '../config';
 import {getUser} from './GetUser';
+import {getUserStats} from './GetUserStats';
 import {login} from './Login';
 import {patchUser} from './PatchUser';
 
@@ -18,6 +19,7 @@ export const launchAPI = async (server: Server): Promise<unknown> => {
             login(server);
             patchUser(server);
             getUser(server);
+            getUserStats(server);
         }
     }, {
         routes: {
