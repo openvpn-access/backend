@@ -19,7 +19,7 @@ type PatchUserPayload = {
 export const patchUser = (server: Server): void => {
     server.route({
         method: 'PUT',
-        path: '/user/{user}',
+        path: '/users/{user}',
         options: {
             validate: {
                 payload: Joi.object({

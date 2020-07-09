@@ -14,7 +14,7 @@ type GetUserPayload = {
 export const getUser = (server: Server): void => {
     server.route({
         method: 'GET',
-        path: '/user',
+        path: '/users',
         options: {
             validate: {
                 query: Joi.object({
@@ -43,7 +43,7 @@ export const getUser = (server: Server): void => {
             const res = await query(`
                 SELECT id, created_at, updated_at, type, state, email, email_verified, username
                     FROM user
-                    ORDER BY ${sort /* '?' does not work, sort is and enum and therefore properly validated  */}
+                    ORDER BY ${sort /* '?' does not work, sort is an enum and therefore properly validated  */}
                     LIMIT ?
                     OFFSET ?
             `, [per_page, offset]);
