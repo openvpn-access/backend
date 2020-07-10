@@ -66,7 +66,7 @@ export const login = (server: Server): void => {
                         VALUES (?, ?, ?)
                 `, ['fail', id, ipAddr]);
 
-                return createError('User not found', STATUS.NOT_FOUND, 2);
+                return createError('User not found', STATUS.NOT_FOUND, 2, 'username');
             }
 
             // Check if user exeeded the login-attempt limit
@@ -81,7 +81,7 @@ export const login = (server: Server): void => {
             if (!loginAttempts || loginAttempts[0].count >= config.security.loginAttempts) {
 
                 // Account locked
-                return createError('Account locked, try again later.', STATUS.LOCKED, 3);
+                return createError('Account locked, try again later.', STATUS.LOCKED, 3, 'username');
             }
 
             // Compare passwords
@@ -115,7 +115,7 @@ export const login = (server: Server): void => {
                 `, [user.id, 'fail', id, ipAddr]);
 
             // Forbidden
-            return createError('Invalid password', STATUS.UNAUTHORIZED, 4);
+            return createError('Invalid password', STATUS.UNAUTHORIZED, 4, 'password');
         }
     });
 };

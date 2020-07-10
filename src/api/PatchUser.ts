@@ -12,6 +12,7 @@ import isEmail = validator.isEmail;
 type PatchUserPayload = {
     username?: string;
     email?: string;
+    type?: DBUser['type'],
     password?: string;
     currentPassword?: string;
 };
@@ -23,53 +24,69 @@ export const patchUser = (server: Server): void => {
         options: {
             validate: {
                 payload: Joi.object({
-                    username: Joi.string(),
-                    email: Joi.string(),
-                    password: Joi.string(),
-                    currentPassword: Joi.string().required()
+                    username: Joi.string().allow(''),
+                    email: Joi.string().allow(''),
+                    type: Joi.string().valid('user', 'admin'),
+                    password: Joi.string().allow(''),
+                    currentPassword: Joi.string().allow('')
                 })
             }
         },
         async handler(req, rt) {
             const caller = req.auth.credentials.user as DBUser;
             const data = req.payload as PatchUserPayload;
+            const {user} = req.params;
 
             const {
                 username = caller.username,
                 email = caller.email,
-                currentPassword
+                type = caller.type,
+                currentPassword // TODO: Conver to snake case
             } = data;
 
             // TODO: Create universal schema validation class
-            if (caller.username === 'admin' && username !== 'admin') {
-                return createError('The admin cannot change its username.', STATUS.FORBIDDEN, 1);
+            if (user === 'admin' && caller.username === 'admin' && username !== 'admin') {
+                return createError('The admin cannot change its username.', STATUS.FORBIDDEN, 1, 'username'); // TODO: Move error codes to module
             } else if (!isEmail(email)) {
-                return createError('Invalid E-Mail.', STATUS.BAD_REQUEST, 3);
-            } else if (!username.match(/^[\w]{1,50}$/)) {
-                return createError('Username can only contain alphanumeric characters and must have a length between 1 and 50.', STATUS.BAD_REQUEST, 4);
+                return createError('Invalid E-Mail.', STATUS.UNPROCESSABLE_ENTITY, 3, 'email');
+            } else if (!username.match(/^[\w]*$/)) {
+                return createError('Username can only contain alphanumeric characters.', STATUS.UNPROCESSABLE_ENTITY, 4, 'username');
+            } else if (!username.length) {
+                return createError('Username cannot be empty.', STATUS.BAD_REQUEST, 6);
+            } else if (username.length > 50) {
+                return createError('Username must be below 50 characters.', STATUS.UNPROCESSABLE_ENTITY, 7, 'username');
             } else if (data.password && (data.password.length < 8 || data.password.length > 50)) {
-                return createError('Passwort must have a length between 8 and 50', STATUS.BAD_GATEWAY, 5);
+                return createError('Passwort must have a length between 8 and 50', STATUS.UNPROCESSABLE_ENTITY, 5, 'password');
             }
 
             // Validate password
             if (
-                !(currentPassword && await compare(currentPassword, caller.password)) ||
+                currentPassword && !(await compare(currentPassword, caller.password)) ||
                 (caller.type === 'admin' && username !== 'admin' && data.password !== undefined)
             ) {
-                return createError('Invalid password', STATUS.FORBIDDEN, 2);
+                return createError('Invalid password', STATUS.FORBIDDEN, 2, 'currentPassword');
             }
 
-            // Update user in db TODO: Username already in use?
+            // Update user in db
             const newPassword = data.password ? await hash(data.password, config.security.saltRounds) : caller.password;
             await query(`
                 UPDATE user
                     SET username = ?,
                         email = ?,
+                        type = ?,
                         password = ?
-                    WHERE id = ?;
-            `, [username, email, newPassword, caller.id]); // TODO: Invalidate all sessions?
+                    WHERE username = ?;
+            `, [username, email, type, newPassword, user]); // TODO: Invalidate all sessions?
 
-            return rt.response().code(STATUS.OK);
+            return rt.response(
+
+                // TODO: Move to utility?
+                (await query(`
+                    SELECT id, created_at, updated_at, type, state, email, email_verified, username
+                        FROM user
+                        WHERE username = ?
+                `, user))[0]
+            ).code(STATUS.OK);
         }
     });
 };
