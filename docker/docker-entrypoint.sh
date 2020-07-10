@@ -23,7 +23,16 @@ echo "Configuring database..."
 
 mysql -u openvpn-access -p${1} -h db openvpn_access < /opt/app/sql/Setup.sql
 
+if [[ $? -eq 0 ]]; then
+    echo "Database configured!"
+else
+    echo "Error configuring the database!"
+    exit 1
+fi
+
 # Start app
+
+echo "Starting the backend..."
 
 cd /opt/app
 node ./dist/src/index.js
