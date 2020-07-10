@@ -27,6 +27,13 @@ CREATE TABLE user (
     username tinytext NOT NULL UNIQUE,
     password tinytext NOT NULL,
 
+    # It's possible to limit the user in a way he can only user a certain amount of
+    # bytes in a specific time period.
+    transfer_limit_period int UNSIGNED DEFAULT null, # Period in seconds
+    transfer_limit_start date DEFAULT null, # At when the user will be able to use his account
+    transfer_limit_end date DEFAULT null, # Expiry date for this period
+    transfer_limit_bytes bigint DEFAULT null, # Amount of bytes the user will be able to use in a single period
+
     # Constraints
     PRIMARY KEY (id)
 ) ENGINE = INNODB,
@@ -42,7 +49,7 @@ CREATE TABLE login_attempt_web (
     user_id int DEFAULT null,
     created_at date NOT NULL DEFAULT CURDATE(),
 
-    # Staet, tried username and ip address
+    # State, tried username and ip address
     state enum ('pass', 'fail') NOT NULL,
     username tinytext NOT NULL,
     ip_addr tinytext NOT NULL,
