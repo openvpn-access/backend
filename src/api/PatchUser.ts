@@ -10,9 +10,9 @@ import {Status} from './enums/Status';
 type PatchUserPayload = {
     username?: string;
     email?: string;
-    type?: DBUser['type'],
+    type?: DBUser['type'];
     password?: string;
-    currentPassword?: string;
+    current_password?: string;
 };
 
 const Payload = Joi.object({
@@ -20,7 +20,7 @@ const Payload = Joi.object({
     email: Joi.string().allow(''),
     type: Joi.string().valid('user', 'admin'),
     password: Joi.string().allow(''),
-    currentPassword: Joi.string().allow('')
+    current_password: Joi.string().allow('')
 });
 
 export const patchUser = async (req: Request, res: Response): Promise<void> => {
@@ -36,7 +36,7 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
         username = caller.username,
         email = caller.email,
         type = caller.type,
-        currentPassword // TODO: Conver to snake case
+        current_password
     } = value as PatchUserPayload;
 
     if (user === 'admin' && caller.username === 'admin' && username !== 'admin') {
@@ -45,7 +45,7 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
 
     // Validate password
     if (
-        currentPassword && !(await compare(currentPassword, caller.password)) ||
+        current_password && !(await compare(current_password, caller.password)) ||
         (caller.type === 'admin' && username !== 'admin' && value.password !== undefined)
     ) {
         return res.error('Invalid password', Status.FORBIDDEN, ErrorCode.INVALID_PASSWORD);
