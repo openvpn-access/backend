@@ -2,7 +2,8 @@ import Joi from '@hapi/joi';
 import {Request, Response} from 'express';
 import {query} from '../db';
 import {DBUser} from '../db/types';
-import {Status} from '../utils/status';
+import {ErrorCode} from './enums/ErrorCode';
+import {Status} from './enums/Status';
 
 type GetUserPayload = {
     page?: number;
@@ -19,13 +20,13 @@ const Payload = Joi.object({
 export const getUser = async (req: Request, res: Response): Promise<void> => {
     const {error, value} = Payload.validate(req.query);
     if (error) {
-        return res.error(error);
+        return res.error(error, Status.BAD_REQUEST, ErrorCode.INVALID_PAYLOAD);
     }
 
     // Only admins are allowed to fetch users
     const caller = req.session.user as DBUser;
     if (caller.type !== 'admin') {
-        return res.error('Not allowed.', Status.UNAUTHORIZED);
+        return res.error('Not allowed.', Status.UNAUTHORIZED, ErrorCode.NOT_ALLOWED);
     }
 
     const {

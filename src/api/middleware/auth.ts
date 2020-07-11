@@ -1,6 +1,7 @@
 import {NextFunction, Request, Response} from 'express';
 import {query} from '../../db';
-import {Status} from '../../utils/status';
+import {ErrorCode} from '../enums/ErrorCode';
+import {Status} from '../enums/Status';
 import {DBUser} from '../../db/types';
 
 declare module 'express-serve-static-core' {
@@ -19,7 +20,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
     const {authorization} = req.headers;
     const token = authorization && authorization.slice(7);
     if (!token) {
-        return res.error('Missing baerer token', Status.BAD_REQUEST);
+        return res.error('Missing baerer token', Status.BAD_REQUEST, ErrorCode.MISSING_TOKEN);
     }
 
     const users = await query(`
@@ -30,7 +31,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
     `, [token]);
 
     if (!users.length) {
-        return res.error('Invalid baerer token', Status.UNAUTHORIZED);
+        return res.error('Invalid baerer token', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
     }
 
     req.session = {user: users[0]};

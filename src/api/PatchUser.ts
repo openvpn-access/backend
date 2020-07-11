@@ -4,7 +4,8 @@ import {Request, Response} from 'express';
 import {config} from '../config';
 import {query} from '../db';
 import {DBUser} from '../db/types';
-import {Status} from '../utils/status';
+import {ErrorCode} from './enums/ErrorCode';
+import {Status} from './enums/Status';
 
 type PatchUserPayload = {
     username?: string;
@@ -25,7 +26,7 @@ const Payload = Joi.object({
 export const patchUser = async (req: Request, res: Response): Promise<void> => {
     const {error, value} = Payload.validate(req.body);
     if (error) {
-        return res.error(error);
+        return res.error(error, Status.BAD_REQUEST, ErrorCode.INVALID_PAYLOAD);
     }
 
     const caller = req.session.user;
@@ -39,7 +40,7 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
     } = value as PatchUserPayload;
 
     if (user === 'admin' && caller.username === 'admin' && username !== 'admin') {
-        return res.error('The admin cannot change its username.', Status.FORBIDDEN); // TODO: Move error codes to module
+        return res.error('The admin cannot change its username.', Status.FORBIDDEN, ErrorCode.NOT_ALLOWED);
     }
 
     // Validate password
@@ -47,7 +48,7 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
         currentPassword && !(await compare(currentPassword, caller.password)) ||
         (caller.type === 'admin' && username !== 'admin' && value.password !== undefined)
     ) {
-        return res.error('Invalid password', Status.FORBIDDEN);
+        return res.error('Invalid password', Status.FORBIDDEN, ErrorCode.INVALID_PASSWORD);
     }
 
     // Update user in db
@@ -61,14 +62,9 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
             WHERE username = ?;
     `, [username, email, type, newPassword, user]); // TODO: Invalidate all sessions?
 
-    return res.respond(
-
-        // TODO: Move to utility?
-        (await query(`
-            SELECT id, created_at, updated_at, type, state, email, email_verified, username
-                FROM user
-                WHERE username = ?
-        `, user))[0],
-        Status.OK
-    );
+    return res.respond((await query(`
+        SELECT id, created_at, updated_at, type, state, email, email_verified, username
+            FROM user
+            WHERE username = ?
+    `, user))[0]);
 };

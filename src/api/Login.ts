@@ -4,7 +4,8 @@ import Joi from '@hapi/joi';
 import {config} from '../config';
 import {query} from '../db';
 import {omit} from '../utils/pick';
-import {Status} from '../utils/status';
+import {ErrorCode} from './enums/ErrorCode';
+import {Status} from './enums/Status';
 import {secureUid} from '../utils/uid';
 
 type LoginPayload = {
@@ -22,7 +23,7 @@ const Payload = Joi.object({
 export const login = async (req: Request, res: Response): Promise<void> => {
     const {error, value} = Payload.validate(req.body);
     if (error) {
-        return res.error('Invalid payload', Status.UNPROCESSABLE_ENTITY);
+        return res.error('Invalid payload', Status.UNPROCESSABLE_ENTITY, ErrorCode.INVALID_PAYLOAD);
     }
 
     const {id, password, token} = value as LoginPayload;
@@ -43,7 +44,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             });
         }
 
-        return res.error('Invalid token', Status.UNAUTHORIZED);
+        return res.error('Invalid token', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
     }
 
     const ipAddr = req.ip;
@@ -62,7 +63,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
                 VALUES (?, ?, ?)
         `, ['fail', id, ipAddr]);
 
-        return res.error('User not found', Status.NOT_FOUND);
+        return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 
     // Check if user exeeded the login-attempt limit
@@ -77,7 +78,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!loginAttempts || loginAttempts[0].count >= config.security.loginAttempts) {
 
         // Account locked
-        return res.error('Account locked, try again later.', Status.LOCKED);
+        return res.error('Account locked, try again later.', Status.LOCKED, ErrorCode.ACCOUNT_LOCKED);
     }
 
     // Compare passwords
@@ -111,5 +112,5 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     `, [user.id, 'fail', id, ipAddr]);
 
     // Forbidden
-    return res.error('Invalid password', Status.UNAUTHORIZED);
+    return res.error('Invalid password', Status.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);
 };

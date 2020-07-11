@@ -1,14 +1,15 @@
 import {Request, Response} from 'express';
 import {query} from '../db';
 import {DBUser} from '../db/types';
-import {Status} from '../utils/status';
+import {ErrorCode} from './enums/ErrorCode';
+import {Status} from './enums/Status';
 
 export const getUserStats = async (req: Request, res: Response): Promise<void> => {
     const caller = req.session.user as DBUser;
 
     // Only admins are allowed to fetch users
     if (caller.type !== 'admin') {
-        return res.error('Not allowed.', Status.UNAUTHORIZED);
+        return res.error('Not allowed.', Status.UNAUTHORIZED, ErrorCode.NOT_ALLOWED);
     }
 
     const qres = await query(`
@@ -17,7 +18,7 @@ export const getUserStats = async (req: Request, res: Response): Promise<void> =
     `);
 
     if (!qres.length) {
-        return res.error('Couldn\' find any values', Status.INTERNAL_SERVER_ERROR);
+        return res.error('Couldn\' find any values', Status.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
     }
 
     return res.respond({
