@@ -2,7 +2,7 @@ import mariadb, {QueryOptions} from 'mariadb';
 import {config} from '../config';
 import {log, LogLevel} from '../logging';
 
-const pool = mariadb.createPool({
+export const pool = mariadb.createPool({
     host: config.db.host,
     port: config.db.port,
     user: config.db.user,
@@ -21,7 +21,6 @@ export const db = pool.getConnection()
         }, LogLevel.FATAL);
         process.exit(-5);
     });
-
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */

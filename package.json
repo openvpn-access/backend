@@ -10,7 +10,7 @@
         "build": "tsc",
         "start": "tsc && node dist/index.js",
         "dev": "ts-node-dev src/index.ts",
-        "test": "jest",
+        "test": "jest ",
         "test:watch": "jest --watch",
         "lint:ts": "eslint src/**/*.{js,ts} tests/**/*.{js,ts}",
         "lint:ts:fix": "eslint src/**/*.{js,ts} tests/**/*.{js,ts} --fix",
