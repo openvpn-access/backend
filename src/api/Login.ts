@@ -47,12 +47,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         return res.error('Invalid token', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
     }
 
-    const ipAddr = req.ip; // TODO: Email
+    const ipAddr = req.ip;
     const users = await query(`
         SELECT * FROM user
             WHERE username = ?
+               OR email = ?
             LIMIT 1;
-    `, [id]);
+    `, [id, id]);
 
     // Not found
     if (!users.length) {

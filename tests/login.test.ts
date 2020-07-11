@@ -14,10 +14,21 @@ describe('POST /api/login', () => {
             .expect(errorCode(ErrorCode.INVALID_PAYLOAD));
     });
 
-    it('Should login the administrator using the default credentials', async () => {
+    it('Should login the administrator using username and password', async () => {
         return request(app)
             .post('/api/login')
             .send({id: 'admin', password: 'password'})
+            .expect(Status.OK)
+            .then(res => {
+                expect(res.body.token).toBeString();
+                expect(res.body.user).toBeObject();
+            });
+    });
+
+    it('Should login the administrator using username and email', async () => {
+        return request(app)
+            .post('/api/login')
+            .send({id: 'admin@vpnaccess.com', password: 'password'})
             .expect(Status.OK)
             .then(res => {
                 expect(res.body.token).toBeString();
