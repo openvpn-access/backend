@@ -1,4 +1,4 @@
-export enum STATUS {
+export enum Status {
 
     // Informational
     CONTINUE = 100,

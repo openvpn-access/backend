@@ -1,29 +1,21 @@
-import {Server} from 'hapi';
-import {config} from '../config';
+import {Router} from 'express';
 import {getUser} from './GetUser';
 import {getUserStats} from './GetUserStats';
 import {login} from './Login';
+import {auth} from './middleware/auth';
 import {patchUser} from './PatchUser';
 
 /**
- * This function takes care of registering all the important,
- * api-related endpoints.
- * @param server
+ * Returns a router will all api-related endpoints bound to it.
  */
-export const launchAPI = async (server: Server): Promise<unknown> => {
-    return server.register({
-        name: 'api-wrapper',
-        register(server) {
+export const api = (): Router => {
+    const router = Router();
 
-            // Register api endpoints
-            login(server);
-            patchUser(server);
-            getUser(server);
-            getUserStats(server);
-        }
-    }, {
-        routes: {
-            prefix: config.server.apiEndpoint
-        }
-    });
+    // Register routes
+    router.post('/login', login);
+    router.get('/users', auth, getUser);
+    router.get('/users/stats', auth, getUserStats);
+    router.patch('/users/:user', auth, patchUser);
+
+    return router;
 };

@@ -1,33 +1,26 @@
-import {Server} from 'hapi';
+import {Request, Response} from 'express';
 import {query} from '../db';
 import {DBUser} from '../db/types';
-import {createError} from '../utils/error';
-import {STATUS} from '../utils/status';
+import {Status} from '../utils/status';
 
-export const getUserStats = (server: Server): void => {
-    server.route({
-        method: 'GET',
-        path: '/users/stats',
-        async handler(req, rt) {
-            const caller = req.auth.credentials.user as DBUser;
+export const getUserStats = async (req: Request, res: Response): Promise<void> => {
+    const caller = req.session.user as DBUser;
 
-            // Only admins are allowed to fetch users
-            if (caller.type !== 'admin') {
-                return createError('Not allowed.', STATUS.UNAUTHORIZED, 1);
-            }
+    // Only admins are allowed to fetch users
+    if (caller.type !== 'admin') {
+        return res.error('Not allowed.', Status.UNAUTHORIZED);
+    }
 
-            const res = await query(`
-                SELECT COUNT(*) as count
-                    FROM user
-            `);
+    const qres = await query(`
+        SELECT COUNT(*) as count
+            FROM user
+    `);
 
-            if (!res.length) {
-                return createError('Couldn\' find any values', STATUS.INTERNAL_SERVER_ERROR, 2);
-            }
+    if (!qres.length) {
+        return res.error('Couldn\' find any values', Status.INTERNAL_SERVER_ERROR);
+    }
 
-            return rt.response({
-                total_users_count: res[0].count
-            }).code(STATUS.OK);
-        }
+    return res.respond({
+        total_users_count: qres[0].count
     });
 };

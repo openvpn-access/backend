@@ -1,35 +1,39 @@
-import Hapi from '@hapi/hapi';
-import {Server} from 'hapi';
-import {launchAPI} from './api';
-import {implementBearerScheme} from './auth';
+import {api} from './api';
+import cors from 'cors';
+import express from 'express';
+import bodyParser from 'body-parser';
 import {config} from './config';
 import {log, LogLevel} from './logging';
+import './extenstions/respond';
 
 (async () => {
-    const isDev = process.env.NODE_ENV === 'development';
-    const server: Server = Hapi.server({
-        port: config.server.port,
-        host: config.server.host,
-        routes: {
-            cors: isDev && {
-                origin: ['*'],
-                additionalHeaders: ['Authorization'],
-                additionalExposedHeaders: ['Authorization']
-            }
-        }
-    });
+    const dev = process.env.NODE_ENV === 'development';
+    const app = express();
 
-    // Register authentication scheme
-    implementBearerScheme(server);
+    // Disable powered-by-message
+    app.disable('x-powered-by');
+    app.set('trust proxy', true);
+    app.use(bodyParser.json());
 
-    await launchAPI(server);
+    // Register api
+    app.use('/api', api());
+
+    // Enable cors during development
+    if (dev) {
+        log('booting', {
+            message: 'Starting app in development'
+        }, LogLevel.INFO);
+
+        app.use(cors());
+    } else {
+        log('booting', {
+            message: 'Starting app in production'
+        }, LogLevel.INFO);
+    }
+
+    app.listen(config.server.port);
     log('booting', {
-        message: 'API Registered'
-    }, LogLevel.INFO);
-
-    await server.start();
-    log('booting', {
-        message: `Starting app in ${process.env.NODE_ENV} mode`
+        message: 'Server successfully started launched.'
     }, LogLevel.INFO);
 })();
 
