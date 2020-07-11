@@ -4,6 +4,7 @@ import {log, LogLevel} from '../logging';
 
 const pool = mariadb.createPool({
     host: config.db.host,
+    port: config.db.port,
     user: config.db.user,
     password: config.db.password,
     database: config.db.database

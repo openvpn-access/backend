@@ -2,6 +2,7 @@ import deepmerge from 'deepmerge';
 import defaultConfig from '../config/default.json';
 import developmentConfig from '../config/development.json';
 import productionConfig from '../config/production.json';
+import testConfig from '../config/test.json';
 import {LogLevel} from './logging';
 
 type Config = {
@@ -13,6 +14,7 @@ type Config = {
 
     db: {
         host: string;
+        port: number;
         user: string;
         password: string;
         database: string;
@@ -31,11 +33,13 @@ type Config = {
     };
 }
 
+const env = process.env.NODE_ENV;
+const sourceConfig = env === 'production' ? productionConfig :
+    env === 'development' ? developmentConfig :
+        testConfig;
+
 export const config = deepmerge(
-    defaultConfig,
-    process.env.NODE_ENV === 'development' ?
-        (developmentConfig as Config) :
-        (productionConfig as Config),
+    defaultConfig, sourceConfig,
     {
         arrayMerge(destinationArray, sourceArray) {
             return sourceArray;
