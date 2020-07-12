@@ -16,11 +16,23 @@ type PatchUserPayload = {
 };
 
 const Payload = Joi.object({
-    username: Joi.string().allow(''),
-    email: Joi.string().allow(''),
-    type: Joi.string().valid('user', 'admin'),
-    password: Joi.string().allow(''),
-    current_password: Joi.string().allow('')
+    username: Joi.string()
+        .min(3)
+        .max(50)
+        .pattern(/^[\w]+$/),
+
+    email: Joi.string()
+        .email({tlds: false}),
+
+    type: Joi.string()
+        .valid('user', 'admin'),
+
+    password: Joi.string()
+        .min(8)
+        .max(50)
+        .pattern(/^[^\s]+$/),
+
+    current_password: Joi.string()
 });
 
 export const patchUser = async (req: Request, res: Response): Promise<void> => {
@@ -48,7 +60,7 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
         current_password && !(await compare(current_password, caller.password)) ||
         (caller.type === 'admin' && username !== 'admin' && value.password !== undefined)
     ) {
-        return res.error('Invalid password', Status.FORBIDDEN, ErrorCode.INVALID_PASSWORD);
+        return res.error('Invalid password', Status.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);
     }
 
     // Update user in db
