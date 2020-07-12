@@ -30,17 +30,17 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     // Try loggin in using the token
     if (token) {
-        const res = await query(`
+        const qres = await query(`
             SELECT u.*
                 FROM user u, user_session us
                 WHERE token = ?
                 LIMIT 1
         `, [token]);
 
-        if (res.length) {
+        if (qres.length) {
             return res.respond({
                 token,
-                user: omit(res[0], ['password'])
+                user: omit(qres[0], ['password'])
             });
         }
 
