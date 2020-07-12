@@ -1,9 +1,20 @@
 import 'jest-extended';
 import request from 'supertest';
-import {app} from '../src';
-import {ErrorCode} from '../src/api/enums/ErrorCode';
-import {Status} from '../src/api/enums/Status';
-import {errorCode} from './utils/error';
+import {app} from '../../src';
+import {ErrorCode} from '../../src/api/enums/ErrorCode';
+import {Status} from '../../src/api/enums/Status';
+import {query} from '../../src/db';
+import {errorCode} from '../utils/error';
+
+beforeAll(async () => {
+
+    // Reset login attempts from admin
+    await query(`
+        DELETE FROM login_attempt_web
+            WHERE state = 'fail'
+              AND username = 'admin'
+    `);
+});
 
 describe('POST /api/login', () => {
     it('Should return an error if the payload is invalid', async () => {
