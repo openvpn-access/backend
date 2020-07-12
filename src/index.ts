@@ -14,23 +14,20 @@ app.disable('x-powered-by');
 app.set('trust proxy', true);
 app.use(bodyParser.json());
 
+if (env === 'development') {
+
+    // Enable cors during development
+    app.use(cors());
+}
+
 // Register api
 app.use('/api', api());
 
 // TODO: Refactor this, that looks ugly
 if (env !== 'test') {
-    if (env === 'development') {
-        log('booting', {
-            message: 'Starting app in development'
-        }, LogLevel.INFO);
-
-        // Enable cors during development
-        app.use(cors());
-    } else {
-        log('booting', {
-            message: 'Starting app in production'
-        }, LogLevel.INFO);
-    }
+    log('booting', {
+        message: `Starting app in ${env}`
+    }, LogLevel.INFO);
 
     app.listen(config.server.port);
     log('booting', {

@@ -4,6 +4,7 @@ import {Status} from '../api/enums/Status';
 
 export type APIError = {
     status: number;
+    code: number;
     message: string;
 };
 
