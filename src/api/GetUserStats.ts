@@ -9,17 +9,13 @@ export const getUserStats = async (req: Request, res: Response): Promise<void> =
 
     // Only admins are allowed to fetch users
     if (caller.type !== 'admin') {
-        return res.error('Not allowed.', Status.UNAUTHORIZED, ErrorCode.NOT_ALLOWED);
+        return res.error('Not allowed.', Status.UNAUTHORIZED, ErrorCode.NOT_ADMIN);
     }
 
-    const qres = await query(`
+    const [, qres] = await query(`
         SELECT COUNT(*) as count
             FROM user
     `);
-
-    if (!qres.length) {
-        return res.error('Couldn\' find any values', Status.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
-    }
 
     return res.respond({
         total_users_count: qres[0].count

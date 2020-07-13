@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import mariadb, {QueryOptions} from 'mariadb';
 import {config} from '../config';
 import {log, LogLevel} from '../logging';
@@ -22,7 +24,15 @@ export const db = pool.getConnection()
         process.exit(-5);
     });
 
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export const query = async (sql: string | QueryOptions, values?: any): Promise<any> =>
-    (await db).query(sql, values);
+export interface DBError extends Error {
+    fatal: boolean;
+    errno: number;
+    sqlState: string;
+    code: string;
+}
+
+export type QueryResult = [DBError | null, any];
+
+export const query = async (sql: string | QueryOptions, values?: any): Promise<QueryResult> => (await db).query(sql, values)
+    .then(res => [null, res] as QueryResult)
+    .catch(err => [err, null] as QueryResult);

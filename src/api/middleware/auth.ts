@@ -23,7 +23,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
         return res.error('Missing baerer token', Status.BAD_REQUEST, ErrorCode.MISSING_TOKEN);
     }
 
-    const users = await query(`
+    const [, users] = await query(`
         SELECT u.*
             FROM user u, user_session us
             WHERE us.token = ?

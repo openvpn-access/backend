@@ -17,7 +17,7 @@ const Payload = Joi.object({
     sort: Joi.string().valid('id', 'created_at', 'updated_at', 'type', 'state', 'email', 'email_verified', 'username')
 });
 
-export const getUser = async (req: Request, res: Response): Promise<void> => {
+export const getUser = async (req: Request, res: Response): Promise<unknown> => {
     const {error, value} = Payload.validate(req.query);
     if (error) {
         return res.error(error, Status.BAD_REQUEST, ErrorCode.INVALID_PAYLOAD);
@@ -26,7 +26,7 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
     // Only admins are allowed to fetch users
     const caller = req.session.user as DBUser;
     if (caller.type !== 'admin') {
-        return res.error('Not allowed.', Status.UNAUTHORIZED, ErrorCode.NOT_ALLOWED);
+        return res.error('Not allowed.', Status.UNAUTHORIZED, ErrorCode.NOT_ADMIN);
     }
 
     const {
@@ -37,7 +37,7 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
 
     // TODO: per_page limit?
     const offset = (page - 1) * per_page;
-    const qres = await query(`
+    const [, qres] = await query(`
         SELECT id, created_at, updated_at, type, state, email, email_verified, username
             FROM user
             ORDER BY ${sort /* '?' does not work, sort is an enum and therefore properly validated  */}

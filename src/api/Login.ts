@@ -20,7 +20,7 @@ const Payload = Joi.object({
     token: Joi.string()
 }).xor('id', 'token').xor('password', 'token');
 
-export const login = async (req: Request, res: Response): Promise<void> => {
+export const login = async (req: Request, res: Response): Promise<unknown> => {
     const {error, value} = Payload.validate(req.body);
     if (error) {
         return res.error('Invalid payload', Status.UNPROCESSABLE_ENTITY, ErrorCode.INVALID_PAYLOAD);
@@ -30,7 +30,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     // Try loggin in using the token
     if (token) {
-        const qres = await query(`
+        const [, qres] = await query(`
             SELECT u.*
                 FROM user u, user_session us
                 WHERE token = ?
@@ -48,7 +48,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const ipAddr = req.ip;
-    const users = await query(`
+    const [, users] = await query(`
         SELECT * FROM user
             WHERE username = ?
                OR email = ?
@@ -68,7 +68,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Check if user exeeded the login-attempt limit
-    const loginAttempts = await query(`
+    const [, loginAttempts] = await query(`
         SELECT COUNT(*) AS count
             FROM login_attempt_web
                 WHERE username = ?
@@ -79,7 +79,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!loginAttempts || loginAttempts[0].count >= config.security.loginAttempts) {
 
         // Account locked
-        return res.error('Account locked, try again later.', Status.LOCKED, ErrorCode.ACCOUNT_LOCKED);
+        return res.error('Account locked, try again later.', Status.LOCKED, ErrorCode.LOCKED_ACCOUNT);
     }
 
     // Compare passwords

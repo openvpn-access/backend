@@ -44,35 +44,71 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
     const caller = req.session.user;
     const {user} = req.params;
 
-    const {
-        username = caller.username,
-        email = caller.email,
-        type = caller.type,
-        current_password
-    } = value as PatchUserPayload;
+    // The administrator cannot change its username
+    if (user === 'admin' && caller.username === 'admin' && value.username !== undefined && value.username !== 'admin') {
+        return res.error('The admin cannot change its username.', Status.FORBIDDEN, ErrorCode.LOCKED_USERNAME);
+    }
 
-    if (user === 'admin' && caller.username === 'admin' && username !== 'admin') {
-        return res.error('The admin cannot change its username.', Status.FORBIDDEN, ErrorCode.NOT_ALLOWED);
+    // Users can only change themselves
+    if (caller.type === 'user' && caller.username !== user) {
+        return res.error('Users can only change themselves.', Status.FORBIDDEN, ErrorCode.NOT_ADMIN);
+    }
+
+    // Administrators can only change non-password fields
+    if (caller.type === 'admin' && caller.username !== user && value.password !== undefined) {
+        return res.error('Password cannot be changed by administrators.', Status.FORBIDDEN, ErrorCode.LOCKED_PASSWORD);
     }
 
     // Validate password
-    if (
-        current_password && !(await compare(current_password, caller.password)) ||
-        (caller.type === 'admin' && username !== 'admin' && value.password !== undefined)
-    ) {
+    if (value.current_password && !(await compare(value.current_password, caller.password))) {
         return res.error('Invalid password', Status.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);
     }
 
+    // Find user to update
+    const [, targetList] = await query('SELECT * FROM user WHERE username = ?', [user]);
+    if (!targetList.length) {
+        return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
+    }
+
+    const {username, email, type} = {...targetList[0], ...value} as DBUser;
+
+    // Check if username or email is already in use
+    const [, other] = await query(`
+        SELECT username, email
+            FROM user
+            WHERE username != ?
+              AND (username = ? OR email = ?)
+    `, [user, username, email]);
+
+    if (other.length) {
+        const [user] = other;
+
+        // Check if username or email were already in use
+        if (user.username === username) {
+            return res.error('Username is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
+        } else if (user.email === email) {
+            return res.error('Email is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
+        }
+
+        // I have no Idea how we would get here
+        res.sendStatus(500);
+    }
+
     // Update user in db
-    const newPassword = value.password ? await hash(value.password, config.security.saltRounds) : caller.password;
-    await query(`
+    // TODO: Invalidate all sessions?
+    const password = value.password ? await hash(value.password, config.security.saltRounds) : caller.password;
+    const [qerr] = await query(`
         UPDATE user
             SET username = ?,
                 email = ?,
                 type = ?,
                 password = ?
             WHERE username = ?;
-    `, [username, email, type, newPassword, user]); // TODO: Invalidate all sessions?
+    `, [username, email, type, password, user]);
+
+    if (qerr) {
+        res.sendStatus(500);
+    }
 
     return res.respond((await query(`
         SELECT id, created_at, updated_at, type, state, email, email_verified, username
