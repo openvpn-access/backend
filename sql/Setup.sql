@@ -43,8 +43,8 @@ CREATE TABLE user (
 
 
 # ==== Create web-login attempt table ==== #
-#DROP TABLE IF EXISTS login_attempt_web;
-CREATE TABLE login_attempt_web (
+#DROP TABLE IF EXISTS web_login_attempt;
+CREATE TABLE web_login_attempt (
     id int NOT NULL AUTO_INCREMENT,
     user_id int DEFAULT null,
     created_at date NOT NULL DEFAULT CURDATE(),
@@ -65,7 +65,7 @@ CREATE TABLE login_attempt_web (
 
 # ==== Create login attempt table ==== #
 #DROP TABLE IF EXISTS login_attempt_vpn;
-CREATE TABLE login_attempt_vpn (
+CREATE TABLE vpn_login_attempt (
     id int NOT NULL AUTO_INCREMENT,
     user_id int DEFAULT null,
     created_at date NOT NULL DEFAULT CURDATE(),

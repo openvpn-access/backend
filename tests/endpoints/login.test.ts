@@ -10,7 +10,7 @@ beforeAll(async () => {
 
     // Reset login attempts from admin
     await query(`
-        DELETE FROM login_attempt_web
+        DELETE FROM web_login_attempt
             WHERE state = 'fail'
               AND username = 'admin'
     `);

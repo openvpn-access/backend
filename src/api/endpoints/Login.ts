@@ -60,7 +60,7 @@ export const login = async (req: Request, res: Response): Promise<unknown> => {
 
         // Save login attempt
         await query(`
-            INSERT INTO login_attempt_web (state, username, ip_addr)
+            INSERT INTO web_login_attempt (state, username, ip_addr)
                 VALUES (?, ?, ?)
         `, ['fail', id, ipAddr]);
 
@@ -70,7 +70,7 @@ export const login = async (req: Request, res: Response): Promise<unknown> => {
     // Check if user exeeded the login-attempt limit
     const [, loginAttempts] = await query(`
         SELECT COUNT(*) AS count
-            FROM login_attempt_web
+            FROM web_login_attempt
                 WHERE username = ?
                     AND state = 'fail'
                     AND created_at BETWEEN DATE_SUB(CURDATE(), INTERVAL ? SECOND) AND CURDATE();
@@ -95,7 +95,7 @@ export const login = async (req: Request, res: Response): Promise<unknown> => {
 
         // Save login attempt
         await query(`
-            INSERT INTO login_attempt_web (user_id, state, username, ip_addr)
+            INSERT INTO web_login_attempt (user_id, state, username, ip_addr)
                 VALUES (?, ?, ?, ?)
         `, [user.id, 'pass', id, ipAddr]);
 
@@ -119,7 +119,7 @@ export const login = async (req: Request, res: Response): Promise<unknown> => {
 
     // Save login attempt
     await query(`
-        INSERT INTO login_attempt_web (user_id, state, username, ip_addr)
+        INSERT INTO web_login_attempt (user_id, state, username, ip_addr)
             VALUES (?, ?, ?, ?)
     `, [user.id, 'fail', id, ipAddr]);
 
