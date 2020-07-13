@@ -32,7 +32,7 @@ export const login = async (req: Request, res: Response): Promise<unknown> => {
     if (token) {
         const [, qres] = await query(`
             SELECT u.*
-                FROM user u, user_session us
+                FROM user u, web_session us
                 WHERE token = ?
                 LIMIT 1
         `, [token]);
@@ -89,7 +89,7 @@ export const login = async (req: Request, res: Response): Promise<unknown> => {
         // Create session key and add session
         const token = await secureUid(config.security.apiKeySize);
         await query(`
-            INSERT INTO user_session (user_id, token, ip_addr)
+            INSERT INTO web_session (user_id, token, ip_addr)
                 VALUES (?, ?, ?)
         `, [user.id, token, ipAddr]);
 

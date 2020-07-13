@@ -16,10 +16,10 @@ CREATE TABLE user (
 
     # Administrator will have access to user-management, normal user
     # will only be able to change their credentials and view stats.
-    type enum ('admin', 'user'),
+    type enum ('admin', 'user') NOT NULL,
 
     # Account state
-    state enum ('activated', 'pending', 'deactivated'),
+    state enum ('activated', 'pending', 'deactivated') NOT NULL,
 
     # Credentials
     email varchar(320) NOT NULL UNIQUE, # See https://tools.ietf.org/html/rfc3696
@@ -56,7 +56,7 @@ CREATE TABLE login_attempt_web (
 
     # Constraints
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE = INNODB,
   AUTO_INCREMENT = 1,
   CHARACTER SET utf8,
@@ -77,7 +77,7 @@ CREATE TABLE login_attempt_vpn (
 
     # Constraints
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE = INNODB,
   AUTO_INCREMENT = 1,
   CHARACTER SET utf8,
@@ -86,8 +86,8 @@ CREATE TABLE login_attempt_vpn (
 
 # ==== Create user session table ==== #
 # A "session" represents a single vpn-session.
-#DROP TABLE IF EXISTS user_session;
-CREATE TABLE user_session (
+#DROP TABLE IF EXISTS web_session;
+CREATE TABLE web_session (
     id int NOT NULL AUTO_INCREMENT,
     user_id int NOT NULL,
     ip_addr tinytext NOT NULL,
@@ -98,7 +98,7 @@ CREATE TABLE user_session (
 
     # Constraints
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE = INNODB,
   AUTO_INCREMENT = 1,
   CHARACTER SET utf8,
@@ -122,7 +122,7 @@ CREATE TABLE vpn_session (
 
     # Constraints
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE = INNODB,
   AUTO_INCREMENT = 1,
   CHARACTER SET utf8,

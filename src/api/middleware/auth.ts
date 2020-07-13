@@ -25,7 +25,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
 
     const [, users] = await query(`
         SELECT u.*
-            FROM user u, user_session us
+            FROM user u, web_session us
             WHERE us.token = ?
             LIMIT 1
     `, [token]);
