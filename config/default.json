@@ -9,7 +9,23 @@
         "port": 3306,
         "user": "root",
         "password": "password",
-        "database": "openvpn_access"
+        "database": "openvpn_access",
+        "exposed": {
+            "user": [
+                "id",
+                "created_at",
+                "updated_at",
+                "type",
+                "state",
+                "email",
+                "email_verified",
+                "username",
+                "transfer_limit_period",
+                "transfer_limit_start",
+                "transfer_limit_end",
+                "transfer_limit_bytes"
+            ]
+        }
     },
     "security": {
         "saltRounds": 10,

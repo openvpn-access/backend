@@ -18,6 +18,9 @@ type Config = {
         user: string;
         password: string;
         database: string;
+        exposed: {
+            user: Array<string>;
+        };
     };
 
     security: {

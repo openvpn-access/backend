@@ -7,19 +7,11 @@ import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 
-type PatchUserPayload = {
-    username?: string;
-    email?: string;
-    type?: DBUser['type'];
-    password?: string;
-    current_password?: string;
-};
-
 const Payload = Joi.object({
     username: Joi.string()
         .min(3)
         .max(50)
-        .pattern(/^[\w]+$/),
+        .pattern(/^[\w.]+$/),
 
     email: Joi.string()
         .email({tlds: false}),
@@ -97,22 +89,24 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
     // Update user in db
     // TODO: Invalidate all sessions?
     const password = value.password ? await hash(value.password, config.security.saltRounds) : caller.password;
-    const [qerr] = await query(`
+    const [qerr, qres] = await query(`
         UPDATE user
             SET username = ?,
                 email = ?,
                 type = ?,
                 password = ?
             WHERE username = ?;
-    `, [username, email, type, password, user]);
+    `, [username, email, type, password, user])
+        .then(() => query(`
+            SELECT ${config.db.exposed.user.join(',')}
+                FROM user
+                WHERE username = ?
+                LIMIT 1
+        `, username));
 
-    if (qerr) {
+    if (qerr || !qres.length) {
         res.sendStatus(500);
     }
 
-    return res.respond((await query(`
-        SELECT id, created_at, updated_at, type, state, email, email_verified, username
-            FROM user
-            WHERE username = ?
-    `, user))[0]);
+    return res.respond(qres[0]);
 };

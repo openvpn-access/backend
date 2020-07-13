@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import Joi from '@hapi/joi';
 import {config} from '../../config';
 import {query} from '../../db';
-import {omit} from '../../utils/pick';
+import {pick} from '../../utils/pick';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {secureUid} from '../../utils/uid';
@@ -30,17 +30,17 @@ export const login = async (req: Request, res: Response): Promise<unknown> => {
 
     // Try loggin in using the token
     if (token) {
-        const [, qres] = await query(`
+        const [qerr, qres] = await query(`
             SELECT u.*
                 FROM user u, web_session us
                 WHERE token = ?
                 LIMIT 1
         `, [token]);
 
-        if (qres.length) {
+        if (!qerr && qres.length) {
             return res.respond({
                 token,
-                user: omit(qres[0], ['password'])
+                user: pick(qres[0], ...config.db.exposed.user)
             });
         }
 
@@ -99,10 +99,21 @@ export const login = async (req: Request, res: Response): Promise<unknown> => {
                 VALUES (?, ?, ?, ?)
         `, [user.id, 'pass', id, ipAddr]);
 
-        // Okay
+        // Grab newly inserted user
+        const [qerr, qres] = await query(`
+            SELECT ${config.db.exposed.user.join(',')}
+                FROM user
+                WHERE id = ?
+        `, [user.id]);
+
+        // Errored or empty result
+        if (qerr || !qres.length) {
+            return res.sendStatus(500);
+        }
+
         return res.respond({
             token,
-            user: omit(user, ['password'])
+            user: qres[0]
         });
     }
 
