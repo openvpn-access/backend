@@ -30,5 +30,5 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
         return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 
-    res.sendStatus(200);
+    res.respond();
 };

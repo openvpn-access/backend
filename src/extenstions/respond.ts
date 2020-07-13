@@ -20,6 +20,12 @@ declare module 'express-serve-static-core' {
         respond(body: any, status?: Status): void;
 
         /**
+         * Response with empty body.
+         * @param status, default is 204
+         */
+        respond(status?: Status): void;
+
+        /**
          * Responds with an arror
          * @param m Either a string or a validation error
          * @param s Status message, default is BAD_REQUEST
@@ -29,8 +35,20 @@ declare module 'express-serve-static-core' {
     }
 }
 
-express.response.respond = function(body, status) {
-    this.status(status || Status.OK);
+express.response.respond = function(body: any, status = Status.OK) {
+    switch (typeof body) {
+        case 'number': {
+            status = body;
+            body = '';
+            break;
+        }
+        case 'undefined': {
+            body = '';
+            status = Status.NO_CONTENT;
+        }
+    }
+
+    this.status(status);
     this.send(body);
 };
 
