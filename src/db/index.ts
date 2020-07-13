@@ -33,6 +33,22 @@ export interface DBError extends Error {
 
 export type QueryResult = [DBError | null, any];
 
-export const query = async (sql: string | QueryOptions, values?: any): Promise<QueryResult> => (await db).query(sql, values)
-    .then(res => [null, res] as QueryResult)
-    .catch(err => [err, null] as QueryResult);
+export const query = async (sql: string | QueryOptions, values?: Array<unknown> | Record<string, unknown> | unknown): Promise<QueryResult> => {
+    let promise;
+
+    // Named values
+    if (typeof sql === 'string' &&
+        typeof values === 'object' &&
+        values !== null &&
+        !Array.isArray(values)) {
+        promise = (await db).query({
+            namedPlaceholders: true,
+            sql
+        }, values);
+    } else {
+        promise = (await db).query(sql, values);
+    }
+
+    return promise.then(res => [null, res] as QueryResult)
+        .catch(err => [err, null] as QueryResult);
+};

@@ -8,21 +8,29 @@ import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 
 const Payload = Joi.object({
+    type: Joi.string()
+        .valid('user', 'admin'),
+
+    state: Joi.string()
+        .valid('activated', 'pending', 'deactivated'),
+
+    email: Joi.string()
+        .email({tlds: false}),
+
     username: Joi.string()
         .min(3)
         .max(50)
         .pattern(/^[\w.]+$/),
 
-    email: Joi.string()
-        .email({tlds: false}),
-
-    type: Joi.string()
-        .valid('user', 'admin'),
-
     password: Joi.string()
         .min(8)
         .max(50)
         .pattern(/^[^\s]+$/),
+
+    transfer_limit_period: Joi.number(),
+    transfer_limit_start: Joi.date(),
+    transfer_limit_end: Joi.date(),
+    transfer_limit_bytes: Joi.number(),
 
     current_password: Joi.string()
 });
@@ -62,23 +70,32 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
         return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 
-    const {username, email, type} = {...targetList[0], ...value} as DBUser;
+    // pre-process password
+    if (value.password) {
+        value.password = await hash(value.password, config.security.saltRounds);
+    }
+
+    const updatedUser = {
+        _target: user,
+        ...targetList[0],
+        ...value
+    } as DBUser;
 
     // Check if username or email is already in use
-    const [, other] = await query(`
+    const [err, other] = await query(`
         SELECT username, email
             FROM user
-            WHERE username != ?
-              AND (username = ? OR email = ?)
-    `, [user, username, email]);
+            WHERE username != :_target
+              AND (username = :username OR email = :email)
+    `, updatedUser);
 
-    if (other.length) {
+    if (!err && other.length) {
         const [user] = other;
 
         // Check if username or email were already in use
-        if (user.username === username) {
+        if (user.username === updatedUser.username) {
             return res.error('Username is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
-        } else if (user.email === email) {
+        } else if (user.email === updatedUser.email) {
             return res.error('Email is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
         }
 
@@ -88,21 +105,25 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
 
     // Update user in db
     // TODO: Invalidate all sessions?
-    const password = value.password ? await hash(value.password, config.security.saltRounds) : caller.password;
     const [qerr, qres] = await query(`
         UPDATE user
-            SET username = ?,
-                email = ?,
-                type = ?,
-                password = ?
-            WHERE username = ?;
-    `, [username, email, type, password, user])
+            SET username = :username,
+                email = :email,
+                type = :type,
+                state = :state,
+                password = :password,
+                transfer_limit_period = :transfer_limit_period,
+                transfer_limit_start = :transfer_limit_start,
+                transfer_limit_end = :transfer_limit_end,
+                transfer_limit_bytes = :transfer_limit_bytes
+            WHERE username = :_target;
+    `, updatedUser)
         .then(() => query(`
             SELECT ${config.db.exposed.user.join(',')}
                 FROM user
                 WHERE username = ?
                 LIMIT 1
-        `, username));
+        `, updatedUser.username));
 
     if (qerr || !qres.length) {
         res.sendStatus(500);
