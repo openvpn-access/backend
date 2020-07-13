@@ -1,11 +1,11 @@
 import Joi from '@hapi/joi';
 import {compare, hash} from 'bcrypt';
 import {Request, Response} from 'express';
-import {config} from '../config';
-import {query} from '../db';
-import {DBUser} from '../db/types';
-import {ErrorCode} from './enums/ErrorCode';
-import {Status} from './enums/Status';
+import {config} from '../../config';
+import {query} from '../../db';
+import {DBUser} from '../../db/types';
+import {ErrorCode} from '../enums/ErrorCode';
+import {Status} from '../enums/Status';
 
 type PatchUserPayload = {
     username?: string;

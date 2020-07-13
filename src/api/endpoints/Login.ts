@@ -1,12 +1,12 @@
 import {Request, Response} from 'express';
 import bcrypt from 'bcrypt';
 import Joi from '@hapi/joi';
-import {config} from '../config';
-import {query} from '../db';
-import {omit} from '../utils/pick';
-import {ErrorCode} from './enums/ErrorCode';
-import {Status} from './enums/Status';
-import {secureUid} from '../utils/uid';
+import {config} from '../../config';
+import {query} from '../../db';
+import {omit} from '../../utils/pick';
+import {ErrorCode} from '../enums/ErrorCode';
+import {Status} from '../enums/Status';
+import {secureUid} from '../../utils/uid';
 
 type LoginPayload = {
     password?: string;

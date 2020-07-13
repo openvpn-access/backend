@@ -1,8 +1,8 @@
 import {Request, Response} from 'express';
-import {query} from '../db';
-import {DBUser} from '../db/types';
-import {ErrorCode} from './enums/ErrorCode';
-import {Status} from './enums/Status';
+import {query} from '../../db';
+import {DBUser} from '../../db/types';
+import {ErrorCode} from '../enums/ErrorCode';
+import {Status} from '../enums/Status';
 
 export const getUserStats = async (req: Request, res: Response): Promise<void> => {
     const caller = req.session.user as DBUser;

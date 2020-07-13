@@ -1,9 +1,9 @@
 import Joi from '@hapi/joi';
 import {Request, Response} from 'express';
-import {query} from '../db';
-import {DBUser} from '../db/types';
-import {ErrorCode} from './enums/ErrorCode';
-import {Status} from './enums/Status';
+import {query} from '../../db';
+import {DBUser} from '../../db/types';
+import {ErrorCode} from '../enums/ErrorCode';
+import {Status} from '../enums/Status';
 
 type GetUserPayload = {
     page?: number;
