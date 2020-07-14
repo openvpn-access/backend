@@ -27,10 +27,10 @@ const Payload = Joi.object({
         .max(50)
         .pattern(/^[^\s]+$/),
 
-    transfer_limit_period: Joi.number(),
-    transfer_limit_start: Joi.date(),
-    transfer_limit_end: Joi.date(),
-    transfer_limit_bytes: Joi.number(),
+    transfer_limit_period: Joi.alternatives(Joi.number(), null),
+    transfer_limit_start: Joi.alternatives(Joi.date(), null),
+    transfer_limit_end: Joi.alternatives(Joi.date(), null),
+    transfer_limit_bytes: Joi.alternatives(Joi.number(), null),
 
     current_password: Joi.string()
 });

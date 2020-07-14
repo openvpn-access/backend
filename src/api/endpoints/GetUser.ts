@@ -1,5 +1,6 @@
 import Joi from '@hapi/joi';
 import {Request, Response} from 'express';
+import {config} from '../../config';
 import {query} from '../../db';
 import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
@@ -38,7 +39,7 @@ export const getUser = async (req: Request, res: Response): Promise<unknown> => 
     // TODO: per_page limit?
     const offset = (page - 1) * per_page;
     const [, qres] = await query(`
-        SELECT id, created_at, updated_at, type, state, email, email_verified, username
+        SELECT ${config.db.exposed.user.join(',')}
             FROM user
             ORDER BY ${sort /* '?' does not work, sort is an enum and therefore properly validated  */}
             LIMIT ?
