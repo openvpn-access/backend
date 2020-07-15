@@ -35,7 +35,7 @@ const Payload = Joi.object({
     current_password: Joi.string()
 });
 
-export const patchUser = async (req: Request, res: Response): Promise<void> => {
+export const patchUser = async (req: Request, res: Response): Promise<unknown> => {
     const {error, value} = Payload.validate(req.body);
     if (error) {
         return res.error(error, Status.BAD_REQUEST, ErrorCode.INVALID_PAYLOAD);
@@ -100,7 +100,7 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
         }
 
         // I have no Idea how we would get here
-        res.sendStatus(500);
+        return res.sendStatus(500);
     }
 
     // Update user in db
@@ -126,7 +126,7 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
         `, updatedUser.username));
 
     if (qerr || !qres.length) {
-        res.sendStatus(500);
+        return res.sendStatus(500);
     }
 
     return res.respond(qres[0]);

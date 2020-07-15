@@ -19,7 +19,7 @@ CREATE TABLE user (
     type enum ('admin', 'user') NOT NULL,
 
     # Account state
-    state enum ('activated', 'pending', 'deactivated') NOT NULL,
+    state enum ('activated', 'pending', 'deactivated') DEFAULT 'pending',
 
     # Credentials
     email varchar(320) NOT NULL UNIQUE, # See https://tools.ietf.org/html/rfc3696
