@@ -2,7 +2,7 @@ import {Router} from 'express';
 import {deleteUser} from './endpoints/DeleteUser';
 import {getUser} from './endpoints/GetUser';
 import {getUserStats} from './endpoints/GetUserStats';
-import {login} from './endpoints/Login';
+import {postLogin} from './endpoints/PostLogin';
 import {putUser} from './endpoints/PutUser';
 import {auth} from './middleware/auth';
 import {patchUser} from './endpoints/PatchUser';
@@ -14,7 +14,7 @@ export const api = (): Router => {
     const router = Router();
 
     // Register routes
-    router.post('/login', login);
+    router.post('/login', postLogin);
     router.get('/users', auth, getUser);
     router.put('/users', auth, putUser);
     router.get('/users/stats', auth, getUserStats);

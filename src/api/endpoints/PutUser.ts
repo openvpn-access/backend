@@ -94,5 +94,5 @@ export const putUser = async (req: Request, res: Response): Promise<unknown> => 
         return res.sendStatus(500);
     }
 
-    return res.respond(qres[0]);
+    res.respond(qres[0]);
 };

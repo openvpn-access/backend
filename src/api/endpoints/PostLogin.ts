@@ -8,25 +8,19 @@ import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {secureUid} from '../../utils/uid';
 
-type LoginPayload = {
-    password?: string;
-    id?: string;
-    token?: string;
-};
-
 const Payload = Joi.object({
     id: Joi.string(),
     password: Joi.string(),
     token: Joi.string()
 }).xor('id', 'token').xor('password', 'token');
 
-export const login = async (req: Request, res: Response): Promise<unknown> => {
+export const postLogin = async (req: Request, res: Response): Promise<unknown> => {
     const {error, value} = Payload.validate(req.body);
     if (error) {
         return res.error('Invalid payload', Status.UNPROCESSABLE_ENTITY, ErrorCode.INVALID_PAYLOAD);
     }
 
-    const {id, password, token} = value as LoginPayload;
+    const {id, password, token} = value;
 
     // Try loggin in using the token
     if (token) {
@@ -124,5 +118,5 @@ export const login = async (req: Request, res: Response): Promise<unknown> => {
     `, [user.id, 'fail', id, ipAddr]);
 
     // Forbidden
-    return res.error('Invalid password', Status.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);
+    res.error('Invalid password', Status.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);
 };

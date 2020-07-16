@@ -6,16 +6,19 @@ import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 
-type GetUserPayload = {
-    page?: number;
-    per_page?: number;
-    sort?: string;
-};
-
 const Payload = Joi.object({
-    page: Joi.number().integer().positive().min(1),
-    per_page: Joi.number().integer().positive().min(1),
-    sort: Joi.string().valid('id', 'created_at', 'updated_at', 'type', 'state', 'email', 'email_verified', 'username')
+    page: Joi.number()
+        .integer()
+        .positive()
+        .min(1),
+
+    per_page: Joi.number()
+        .integer()
+        .positive()
+        .min(1),
+
+    sort: Joi.string()
+        .valid('id', 'created_at', 'updated_at', 'type', 'state', 'email', 'email_verified', 'username')
 });
 
 export const getUser = async (req: Request, res: Response): Promise<unknown> => {
@@ -34,7 +37,7 @@ export const getUser = async (req: Request, res: Response): Promise<unknown> => 
         page = 1,
         per_page = 60,
         sort = 'id'
-    } = value as GetUserPayload;
+    } = value;
 
     // TODO: per_page limit?
     const offset = (page - 1) * per_page;
@@ -46,5 +49,5 @@ export const getUser = async (req: Request, res: Response): Promise<unknown> => 
             OFFSET ?
     `, [per_page, offset]);
 
-    return res.respond(qres);
+    res.respond(qres);
 };

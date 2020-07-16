@@ -5,6 +5,7 @@ import {config} from '../config';
 import {uid} from '../utils/uid';
 import {Events} from './events';
 
+const DEV_MODE = process.env.NODE_ENV === 'development';
 const LOG_FILE_STREAM_OPTIONS = {flags: 'a'};
 const LOG_DIRECTORY = path.resolve('./.logs');
 const CENTRALIZED_LOGS = path.join(LOG_DIRECTORY, 'all.json');
@@ -61,17 +62,21 @@ export const log = <T extends keyof Events>(
     logger.write(logMessage);
     all.write(logMessage);
 
-    if (process.env.NODE_ENV === 'development') {
-        let msg = `${t} {`;
+    if (DEV_MODE) {
+        const entries = Object.entries(p);
 
-        for (const [key, val] of Object.entries(p)) {
-            if (key !== 'type') {
-                msg += `${key}: "${val}", `;
+        if (entries.length) {
+            let msg = `${t} {`;
+            for (const [key, val] of Object.entries(p)) {
+                if (key !== 'type') {
+                    msg += `${key}: "${val}", `;
+                }
             }
-        }
 
-        process.stdout.write(`${msg.endsWith(', }') ? msg.slice(0, -2) : msg}}`);
-        process.stdout.write('\n');
+            process.stdout.write(`${msg.slice(0, msg.length - 2)}}\n`);
+        } else {
+            process.stdout.write(`${t}\n`);
+        }
     }
 };
 

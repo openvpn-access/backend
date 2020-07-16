@@ -17,7 +17,7 @@ export const getUserStats = async (req: Request, res: Response): Promise<void> =
             FROM user
     `);
 
-    return res.respond({
+    res.respond({
         total_users_count: qres[0].count
     });
 };
