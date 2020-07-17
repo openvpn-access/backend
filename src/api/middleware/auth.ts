@@ -1,9 +1,9 @@
-import {NextFunction, Request, Response} from 'express';
 import {config} from '../../config';
 import {db} from '../../db';
+import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
-import {DBUser} from '../../db/types';
+import {middleware} from '../framework';
 
 declare module 'express-serve-static-core' {
     interface Request {
@@ -17,7 +17,7 @@ declare module 'express-serve-static-core' {
  * Authenticates a client using the baerer token.
  * If the token is valid req.session.user will be a DBUser object.
  */
-export const auth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const auth = middleware(async (req, res) => {
     const {authorization} = req.headers;
     const token = authorization && authorization.slice(7);
     if (!token) {
@@ -39,5 +39,4 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
     }
 
     req.session = {user: session.user as unknown as DBUser};
-    next();
-};
+});

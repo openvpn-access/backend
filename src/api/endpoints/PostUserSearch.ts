@@ -1,10 +1,10 @@
 import Joi from '@hapi/joi';
-import {Request, Response} from 'express';
 import {config} from '../../config';
 import {db} from '../../db';
 import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
+import {endpoint} from '../framework';
 
 const Payload = Joi.object({
     term: Joi.string()
@@ -15,7 +15,7 @@ const Payload = Joi.object({
         .default(100)
 });
 
-export const postUserSearch = async (req: Request, res: Response): Promise<unknown> => {
+export const postUserSearch = endpoint(async (req, res) => {
     const {error, value} = Payload.validate(req.body);
 
     if (error) {
@@ -38,5 +38,5 @@ export const postUserSearch = async (req: Request, res: Response): Promise<unkno
         }
     });
 
-    res.respond(users);
-};
+    return res.respond(users);
+});

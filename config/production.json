@@ -1,9 +1,4 @@
 {
-    "db": {
-        "host": "db",
-        "user": "openvpn-access",
-        "password": "openvpn-access"
-    },
     "logs": {
         "logLevels": [
             "FATAL",

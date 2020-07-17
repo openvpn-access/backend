@@ -1,10 +1,10 @@
-import {Request, Response} from 'express';
 import {db} from '../../db';
 import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
+import {endpoint} from '../framework';
 
-export const getUserStats = async (req: Request, res: Response): Promise<void> => {
+export const getUserStats = endpoint(async (req, res) => {
     const caller = req.session.user as DBUser;
 
     // Only admins are allowed to fetch users
@@ -12,7 +12,7 @@ export const getUserStats = async (req: Request, res: Response): Promise<void> =
         return res.error('Not allowed.', Status.UNAUTHORIZED, ErrorCode.NOT_ADMIN);
     }
 
-    res.respond({
+    return res.respond({
         total_users_count: await db.user.count()
     });
-};
+});

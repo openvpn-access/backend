@@ -1,11 +1,11 @@
-import {Request, Response} from 'express';
-import bcrypt from 'bcrypt';
 import Joi from '@hapi/joi';
+import bcrypt from 'bcrypt';
 import {config} from '../../config';
 import {db} from '../../db';
+import {secureUid} from '../../utils/uid';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
-import {secureUid} from '../../utils/uid';
+import {endpoint} from '../framework';
 
 const Payload = Joi.object({
     id: Joi.string(),
@@ -13,7 +13,7 @@ const Payload = Joi.object({
     token: Joi.string()
 }).xor('id', 'token').xor('password', 'token');
 
-export const postLogin = async (req: Request, res: Response): Promise<unknown> => {
+export const postLogin = endpoint(async (req, res) => {
     const {error, value} = Payload.validate(req.body);
     if (error) {
         return res.error('Invalid payload', Status.UNPROCESSABLE_ENTITY, ErrorCode.INVALID_PAYLOAD);
@@ -125,5 +125,5 @@ export const postLogin = async (req: Request, res: Response): Promise<unknown> =
     });
 
     // Forbidden
-    res.error('Invalid password', Status.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);
-};
+    return res.error('Invalid password', Status.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);
+});

@@ -1,10 +1,10 @@
 import Joi from '@hapi/joi';
 import {hash} from 'bcrypt';
-import {Request, Response} from 'express';
 import {config} from '../../config';
 import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
+import {endpoint} from '../framework';
 
 const Payload = Joi.object({
     type: Joi.string()
@@ -37,7 +37,7 @@ const Payload = Joi.object({
     transfer_limit_bytes: Joi.alternatives(Joi.number(), null).default(null)
 });
 
-export const putUser = async (req: Request, res: Response): Promise<unknown> => {
+export const putUser = endpoint(async (req, res) => {
     const {error, value} = Payload.validate(req.body);
     if (error) {
         return res.error(error, Status.BAD_REQUEST, ErrorCode.INVALID_PAYLOAD);
@@ -73,7 +73,7 @@ export const putUser = async (req: Request, res: Response): Promise<unknown> => 
         }
 
         // I have no Idea how we would get here
-        return res.sendStatus(500);
+        return res.internalError();
     }
 
     // Update user in db
@@ -84,5 +84,5 @@ export const putUser = async (req: Request, res: Response): Promise<unknown> => 
         data: value
     });
 
-    res.respond(user);
-};
+    return res.respond(user);
+});

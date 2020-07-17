@@ -13,11 +13,6 @@ type Config = {
     };
 
     db: {
-        host: string;
-        port: number;
-        user: string;
-        password: string;
-        database: string;
         exposed: {
             user: Record<string, boolean>;
         };

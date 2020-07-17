@@ -1,10 +1,10 @@
 import Joi from '@hapi/joi';
-import {Request, Response} from 'express';
 import {config} from '../../config';
 import {db} from '../../db';
 import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
+import {endpoint} from '../framework';
 
 const Payload = Joi.object({
     page: Joi.number()
@@ -25,7 +25,7 @@ const Payload = Joi.object({
 });
 
 // TODO: Add more fields
-export const getUser = async (req: Request, res: Response): Promise<unknown> => {
+export const getUser = endpoint(async (req, res) => {
     const {error, value} = Payload.validate(req.query);
     if (error) {
         return res.error(error, Status.BAD_REQUEST, ErrorCode.INVALID_PAYLOAD);
@@ -46,5 +46,5 @@ export const getUser = async (req: Request, res: Response): Promise<unknown> => 
         take: per_page
     });
 
-    res.respond(users);
-};
+    return res.respond(users);
+});

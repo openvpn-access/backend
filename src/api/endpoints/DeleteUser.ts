@@ -1,9 +1,9 @@
-import {Request, Response} from 'express';
 import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
+import {endpoint} from '../framework';
 
-export const deleteUser = async (req: Request, res: Response): Promise<void> => {
+export const deleteUser = endpoint(async (req, res) => {
     const caller = req.session.user;
     const {user} = req.params;
 
@@ -27,5 +27,5 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
         return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 
-    res.respond();
-};
+    return res.respond();
+});
