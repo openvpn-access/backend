@@ -52,37 +52,24 @@ export const putUser = endpoint(async (req, res) => {
     // Hash password
     value.password = await hash(value.password, config.security.saltRounds);
 
-    // Check if username or email is already in use
-    const other = await db.user.findMany({
-        where: {
-            OR: [
-                {username: value.username},
-                {email: value.email}
-            ]
-        }
-    });
-
-    if (other.length) {
-        const [user] = other;
-
-        // Check if username or email were already in use
-        if (user.username === value.username) {
-            return res.error('Username is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
-        } else if (user.email === value.email) {
-            return res.error('Email is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
-        }
-
-        // I have no Idea how we would get here
-        return res.internalError();
-    }
-
     // Update user in db
     // TODO: Invalidate all sessions?
-    // TODO: Better error-handling with prisma?
-    const user = await db.user.create({
+    return db.user.create({
         select: config.db.exposed.user,
         data: value
-    });
+    }).then(data => {
+        return res.respond(data);
+    }).catch(e => {
+        if (e.code === 'P2002') {
+            const field = e.meta.target;
 
-    return res.respond(user);
+            if (field === 'username') {
+                return res.error('This username is already in use.', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
+            } else if (field === 'email') {
+                return res.error('This email is already in use.', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
+            }
+        }
+
+        throw e;
+    });
 });

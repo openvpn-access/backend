@@ -77,39 +77,29 @@ export const patchUser = endpoint(async (req, res) => {
         value.password = await hash(value.password, config.security.saltRounds);
     }
 
-    // Check if username or email is already in use
-    const other = await db.user.findMany({
-        where: {
-            OR: [
-                {username: value.username},
-                {email: value.email}
-            ]
-        }
-    });
-
-    if (other.length) {
-        const [user] = other;
-
-        // Check if username or email were already in use
-        if (user.username === currentUser.username) {
-            return res.error('Username is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
-        } else if (user.email === currentUser.email) {
-            return res.error('Email is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
-        }
-
-        // I have no Idea how we would get here
-        return res.internalError();
-    }
-
     // Update user in db
     // TODO: Invalidate all sessions?
-    const updated = await db.user.update({
+    return db.user.update({
         select: config.db.exposed.user,
         data: {...currentUser, ...value},
         where: {
             username: currentUser.username
         }
-    });
+    }).then(data => {
+        return res.respond(data);
+    }).catch(e => {
 
-    return res.respond(updated);
+        // TODO: This code is a duplicate as seen in PutUser, abstract that somehow
+        if (e.code === 'P2002') {
+            const field = e.code.meta.target;
+
+            if (field === 'username') {
+                return res.error('This username is already in use.', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
+            } else if (field === 'email') {
+                return res.error('This email is already in use.', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
+            }
+        }
+
+        throw e;
+    });
 });
