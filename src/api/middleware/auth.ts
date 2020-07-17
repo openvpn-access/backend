@@ -1,5 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
-import {query} from '../../db';
+import {config} from '../../config';
+import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {DBUser} from '../../db/types';
@@ -23,17 +24,20 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
         return res.error('Missing baerer token', Status.BAD_REQUEST, ErrorCode.MISSING_TOKEN);
     }
 
-    const [, users] = await query(`
-        SELECT u.*
-            FROM user u, web_session us
-            WHERE us.token = ?
-            LIMIT 1
-    `, [token]);
+    const session = await db.web_session.findOne({
+        where: {token},
+        select: {
+            token: true,
+            user: {
+                select: config.db.exposed.user
+            }
+        }
+    });
 
-    if (!users.length) {
+    if (!session) {
         return res.error('Invalid baerer token', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
     }
 
-    req.session = {user: users[0]};
+    req.session = {user: session.user as unknown as DBUser};
     next();
 };

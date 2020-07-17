@@ -3,7 +3,7 @@ import request from 'supertest';
 import {app} from '../../src';
 import {ErrorCode} from '../../src/api/enums/ErrorCode';
 import {Status} from '../../src/api/enums/Status';
-import {query} from '../../src/db';
+import {db} from '../../src/db';
 import {errorCode} from '../utils/error';
 
 let token: string | null = null;
@@ -18,13 +18,12 @@ beforeAll(async () => {
         .then(res => token = res.body.token);
 });
 
-afterAll(async ()=>{
+afterAll(async () => {
 
     // Clean up added users
-    await query(`
-        DELETE FROM user
-            WHERE username = 'foobar';
-    `);
+    await db.user.delete({
+        where: {username: 'foobar'}
+    });
 });
 
 describe('PUT /api/users', () => {

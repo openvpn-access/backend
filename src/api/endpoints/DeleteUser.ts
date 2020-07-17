@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import {query} from '../../db';
+import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 
@@ -19,14 +19,11 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
 
     // Check if username or email is already in use
     // TODO: 'ON DELETE CASCADE' ??
-    const [qerr, qres] = await query(`
-        DELETE FROM user
-            WHERE username = ?;
-    `, [user]);
+    const deltedUser = await db.user.delete({
+        where: {username: user}
+    });
 
-    if (qerr) {
-        res.sendStatus(500);
-    } else if (!qres.affectedRows) {
+    if (!deltedUser) {
         return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 

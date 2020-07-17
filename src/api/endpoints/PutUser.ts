@@ -2,7 +2,7 @@ import Joi from '@hapi/joi';
 import {hash} from 'bcrypt';
 import {Request, Response} from 'express';
 import {config} from '../../config';
-import {query} from '../../db';
+import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 
@@ -53,13 +53,16 @@ export const putUser = async (req: Request, res: Response): Promise<unknown> => 
     value.password = await hash(value.password, config.security.saltRounds);
 
     // Check if username or email is already in use
-    const [err, other] = await query(`
-        SELECT username, email
-            FROM user
-            WHERE username = :username OR email = :email
-    `, value);
+    const other = await db.user.findMany({
+        where: {
+            OR: [
+                {username: value.username},
+                {email: value.email}
+            ]
+        }
+    });
 
-    if (!err && other.length) {
+    if (other.length) {
         const [user] = other;
 
         // Check if username or email were already in use
@@ -75,24 +78,11 @@ export const putUser = async (req: Request, res: Response): Promise<unknown> => 
 
     // Update user in db
     // TODO: Invalidate all sessions?
-    const [qerr, qres] = await query(`
-        INSERT INTO user (
-            type, state, email, username, password,
-            transfer_limit_period, transfer_limit_start, transfer_limit_end, transfer_limit_bytes
-        ) VALUES (
-           :type, :state, :email, :username, :password,
-           :transfer_limit_period, :transfer_limit_start, :transfer_limit_end, :transfer_limit_bytes
-        )
-    `, value).then(() => query(`
-        SELECT ${config.db.exposed.user.join(',')}
-            FROM user
-            WHERE username = ?
-            LIMIT 1
-    `, value.username));
+    // TODO: Better error-handling with prisma?
+    const user = await db.user.create({
+        select: config.db.exposed.user,
+        data: value
+    });
 
-    if (qerr || !qres.length) {
-        return res.sendStatus(500);
-    }
-
-    res.respond(qres[0]);
+    res.respond(user);
 };

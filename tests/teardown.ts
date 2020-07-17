@@ -1,7 +1,3 @@
-import {pool} from '../src/db';
+import {db} from '../src/db';
 
-export default async (): Promise<void> => {
-
-    // Close db pool
-    await pool.end();
-};
+export default db.disconnect;

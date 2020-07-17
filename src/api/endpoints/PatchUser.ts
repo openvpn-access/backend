@@ -2,8 +2,7 @@ import Joi from '@hapi/joi';
 import {compare, hash} from 'bcrypt';
 import {Request, Response} from 'express';
 import {config} from '../../config';
-import {query} from '../../db';
-import {DBUser} from '../../db/types';
+import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 
@@ -65,8 +64,11 @@ export const patchUser = async (req: Request, res: Response): Promise<unknown> =
     }
 
     // Find user to update
-    const [, targetList] = await query('SELECT * FROM user WHERE username = ?', [user]);
-    if (!targetList.length) {
+    const currentUser = await db.user.findOne({
+        where: {username: user}
+    });
+
+    if (!currentUser) {
         return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 
@@ -75,27 +77,23 @@ export const patchUser = async (req: Request, res: Response): Promise<unknown> =
         value.password = await hash(value.password, config.security.saltRounds);
     }
 
-    const updatedUser = {
-        _target: user,
-        ...targetList[0],
-        ...value
-    } as DBUser;
-
     // Check if username or email is already in use
-    const [err, other] = await query(`
-        SELECT username, email
-            FROM user
-            WHERE username != :_target
-              AND (username = :username OR email = :email)
-    `, updatedUser);
+    const other = await db.user.findMany({
+        where: {
+            OR: [
+                {username: value.username},
+                {email: value.email}
+            ]
+        }
+    });
 
-    if (!err && other.length) {
+    if (other.length) {
         const [user] = other;
 
         // Check if username or email were already in use
-        if (user.username === updatedUser.username) {
+        if (user.username === currentUser.username) {
             return res.error('Username is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
-        } else if (user.email === updatedUser.email) {
+        } else if (user.email === currentUser.email) {
             return res.error('Email is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
         }
 
@@ -105,29 +103,13 @@ export const patchUser = async (req: Request, res: Response): Promise<unknown> =
 
     // Update user in db
     // TODO: Invalidate all sessions?
-    const [qerr, qres] = await query(`
-        UPDATE user
-            SET username = :username,
-                email = :email,
-                type = :type,
-                state = :state,
-                password = :password,
-                transfer_limit_period = :transfer_limit_period,
-                transfer_limit_start = :transfer_limit_start,
-                transfer_limit_end = :transfer_limit_end,
-                transfer_limit_bytes = :transfer_limit_bytes
-            WHERE username = :_target;
-    `, updatedUser)
-        .then(() => query(`
-            SELECT ${config.db.exposed.user.join(',')}
-                FROM user
-                WHERE username = ?
-                LIMIT 1
-        `, updatedUser.username));
+    const updated = await db.user.update({
+        select: config.db.exposed.user,
+        data: {...currentUser, ...value},
+        where: {
+            username: currentUser.username
+        }
+    });
 
-    if (qerr || !qres.length) {
-        return res.sendStatus(500);
-    }
-
-    res.respond(qres[0]);
+    res.respond(updated);
 };

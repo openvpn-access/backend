@@ -19,7 +19,7 @@ type Config = {
         password: string;
         database: string;
         exposed: {
-            user: Array<string>;
+            user: Record<string, boolean>;
         };
     };
 

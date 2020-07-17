@@ -2,8 +2,7 @@ import {Request, Response} from 'express';
 import bcrypt from 'bcrypt';
 import Joi from '@hapi/joi';
 import {config} from '../../config';
-import {query} from '../../db';
-import {pick} from '../../utils/pick';
+import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {secureUid} from '../../utils/uid';
@@ -24,98 +23,106 @@ export const postLogin = async (req: Request, res: Response): Promise<unknown> =
 
     // Try loggin in using the token
     if (token) {
-        const [qerr, qres] = await query(`
-            SELECT u.*
-                FROM user u, web_session us
-                WHERE token = ?
-                LIMIT 1
-        `, [token]);
+        const session = await db.web_session.findOne({
+            where: {token},
+            select: {
+                token: true,
+                user: {
+                    select: config.db.exposed.user
+                }
+            }
+        });
 
-        if (!qerr && qres.length) {
-            return res.respond({
-                token,
-                user: pick(qres[0], ...config.db.exposed.user)
-            });
+        if (session) {
+            return res.respond(session);
         }
 
         return res.error('Invalid token', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
     }
 
     const ipAddr = req.ip;
-    const [, users] = await query(`
-        SELECT * FROM user
-            WHERE username = ?
-               OR email = ?
-            LIMIT 1;
-    `, [id, id]);
+    const [user] = await db.user.findMany({
+        where: {
+            OR: [
+                {username: id},
+                {email: id}
+            ]
+        }
+    });
 
     // Not found
-    if (!users.length) {
+    if (!user) {
 
         // Save login attempt
-        await query(`
-            INSERT INTO web_login_attempt (state, username, ip_addr)
-                VALUES (?, ?, ?)
-        `, ['fail', id, ipAddr]);
+        await db.web_login_attempt.create({
+            data: {
+                username: id,
+                ip_addr: ipAddr,
+                state: 'fail'
+            }
+        });
 
         return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 
     // Check if user exeeded the login-attempt limit
-    const [, loginAttempts] = await query(`
-        SELECT COUNT(*) AS count
-            FROM web_login_attempt
-                WHERE username = ?
-                    AND state = 'fail'
-                    AND created_at BETWEEN DATE_SUB(CURDATE(), INTERVAL ? SECOND) AND CURDATE();
-     `, [id, config.security.loginAttemptsTimeRange]);
+    const loginAttempts = await db.web_login_attempt.count({
+        where: {
+            username: id,
+            state: 'fail',
+            created_at: {
+                lt: new Date(Date.now() - config.security.loginAttemptsTimeRange * 1000)
+            }
+        }
+    });
 
-    if (!loginAttempts || loginAttempts[0].count >= config.security.loginAttempts) {
+    if (loginAttempts >= config.security.loginAttempts) {
 
         // Account locked
         return res.error('Account locked, try again later.', Status.LOCKED, ErrorCode.LOCKED_ACCOUNT);
     }
 
     // Compare passwords
-    const [user] = users;
     if (await bcrypt.compare(password, user.password)) {
 
         // Create session key and add session
         const token = await secureUid(config.security.apiKeySize);
-        await query(`
-            INSERT INTO web_session (user_id, token, ip_addr)
-                VALUES (?, ?, ?)
-        `, [user.id, token, ipAddr]);
+        await db.web_session.create({
+            data: {
+                user: {connect: {id: user.id}},
+                token,
+                ip_addr: ipAddr
+            }
+        });
 
         // Save login attempt
-        await query(`
-            INSERT INTO web_login_attempt (user_id, state, username, ip_addr)
-                VALUES (?, ?, ?, ?)
-        `, [user.id, 'pass', id, ipAddr]);
-
-        // Grab newly inserted user
-        const [qerr, qres] = await query(`
-            SELECT ${config.db.exposed.user.join(',')}
-                FROM user
-                WHERE id = ?
-        `, [user.id]);
-
-        // Errored or empty result
-        if (qerr || !qres.length) {
-            return res.sendStatus(500);
-        }
+        await db.web_login_attempt.create({
+            data: {
+                user: {connect: {id: user.id}},
+                state: 'pass',
+                username: id,
+                ip_addr: ipAddr
+            }
+        });
 
         return res.respond({
             token,
-            user: qres[0]
+            user: await db.user.findOne({
+                select: config.db.exposed.user,
+                where: {id: user.id}
+            })
         });
     }
 
     // Save login attempt
-    await query(`
-        INSERT INTO web_login_attempt (user_id, state, username, ip_addr)
-            VALUES (?, ?, ?, ?)
-    `, [user.id, 'fail', id, ipAddr]);
+    await db.web_login_attempt.create({
+        data: {
+            user: {connect: {id: user.id}},
+            state: 'fail',
+            username: id,
+            ip_addr: ipAddr
+        }
+    });
 
     // Forbidden
     res.error('Invalid password', Status.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);

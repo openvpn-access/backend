@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  created_at            DateTime            @default(dbgenerated())
+  email                 String              @unique
+  email_verified        Boolean             @default(false)
+  id                    Int                 @default(autoincrement()) @id
+  password              String
+  state                 user_state?         @default(pending)
+  transfer_limit_bytes  Int?
+  transfer_limit_end    DateTime?
+  transfer_limit_period Int?
+  transfer_limit_start  DateTime?
+  type                  user_type
+  updated_at            DateTime            @default(now())
+  username              String              @unique
+  vpn_login_attempt     vpn_login_attempt[]
+  vpn_session           vpn_session[]
+  web_login_attempt     web_login_attempt[]
+  web_session           web_session[]
+}
+
+model vpn_login_attempt {
+  created_at DateTime                @default(dbgenerated())
+  id         Int                     @default(autoincrement()) @id
+  ip_addr    String
+  state      vpn_login_attempt_state
+  username   String
+  user_id    Int?
+  user       user?                   @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "user_id")
+}
+
+model vpn_session {
+  closed_at   DateTime?
+  created_at  DateTime  @default(dbgenerated())
+  id          Int       @default(autoincrement()) @id
+  ip_addr     String
+  transferred Int       @default(0)
+  user_id     Int
+  user        user      @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "user_id")
+}
+
+model web_login_attempt {
+  created_at DateTime                @default(dbgenerated())
+  id         Int                     @default(autoincrement()) @id
+  ip_addr    String
+  state      web_login_attempt_state
+  username   String
+  user_id    Int?
+  user       user?                   @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "user_id")
+}
+
+model web_session {
+  created_at DateTime @default(dbgenerated())
+  id         Int      @default(autoincrement()) @id
+  ip_addr    String
+  token      String   @unique
+  user_id    Int
+  user       user     @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "user_id")
+}
+
+enum user_state {
+  activated
+  pending
+  deactivated
+}
+
+enum user_type {
+  admin
+  user
+}
+
+enum vpn_login_attempt_state {
+  empty_cred
+  bad_password
+  eof
+  no_user
+  pass
+}
+
+enum web_login_attempt_state {
+  pass
+  fail
+}
