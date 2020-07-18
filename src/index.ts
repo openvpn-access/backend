@@ -4,7 +4,6 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import {config} from './config';
 import {log, LogLevel} from './logging';
-import './extenstions/respond';
 
 const env = process.env.NODE_ENV;
 export const app = express();

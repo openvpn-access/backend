@@ -1,8 +1,9 @@
-import {NextFunction, Request, Response} from 'express';
-import {query} from '../../db';
+import {config} from '../../config';
+import {db} from '../../db';
+import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
-import {DBUser} from '../../db/types';
+import {middleware} from '../framework';
 
 declare module 'express-serve-static-core' {
     interface Request {
@@ -16,24 +17,26 @@ declare module 'express-serve-static-core' {
  * Authenticates a client using the baerer token.
  * If the token is valid req.session.user will be a DBUser object.
  */
-export const auth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const auth = middleware(async (req, res) => {
     const {authorization} = req.headers;
     const token = authorization && authorization.slice(7);
     if (!token) {
         return res.error('Missing baerer token', Status.BAD_REQUEST, ErrorCode.MISSING_TOKEN);
     }
 
-    const [, users] = await query(`
-        SELECT u.*
-            FROM user u, web_session us
-            WHERE us.token = ?
-            LIMIT 1
-    `, [token]);
+    const session = await db.web_session.findOne({
+        where: {token},
+        select: {
+            token: true,
+            user: {
+                select: config.db.exposed.user
+            }
+        }
+    });
 
-    if (!users.length) {
+    if (!session) {
         return res.error('Invalid baerer token', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
     }
 
-    req.session = {user: users[0]};
-    next();
-};
+    req.session = {user: session.user as unknown as DBUser};
+});

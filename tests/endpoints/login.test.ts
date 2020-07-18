@@ -4,15 +4,16 @@ import {app} from '../../src';
 import {ErrorCode} from '../../src/api/enums/ErrorCode';
 import {Status} from '../../src/api/enums/Status';
 import {config} from '../../src/config';
-import {query} from '../../src/db';
+import {db} from '../../src/db';
 import {errorCode} from '../utils/error';
 
 // Reset login attempts from admin
-const resetLoginAttempts = async () => query(`
-    DELETE FROM web_login_attempt
-        WHERE state = 'fail'
-          AND username = 'admin'
-`);
+const resetLoginAttempts = async () => await db.web_login_attempt.deleteMany({
+    where: {
+        state: 'fail',
+        username: 'admin'
+    }
+});
 
 // Reset login attempts before and after all tests
 beforeAll(resetLoginAttempts);

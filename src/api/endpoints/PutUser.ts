@@ -1,10 +1,10 @@
 import Joi from '@hapi/joi';
 import {hash} from 'bcrypt';
-import {Request, Response} from 'express';
 import {config} from '../../config';
-import {query} from '../../db';
+import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
+import {endpoint} from '../framework';
 
 const Payload = Joi.object({
     type: Joi.string()
@@ -37,7 +37,7 @@ const Payload = Joi.object({
     transfer_limit_bytes: Joi.alternatives(Joi.number(), null).default(null)
 });
 
-export const putUser = async (req: Request, res: Response): Promise<unknown> => {
+export const putUser = endpoint(async (req, res) => {
     const {error, value} = Payload.validate(req.body);
     if (error) {
         return res.error(error, Status.BAD_REQUEST, ErrorCode.INVALID_PAYLOAD);
@@ -52,47 +52,24 @@ export const putUser = async (req: Request, res: Response): Promise<unknown> => 
     // Hash password
     value.password = await hash(value.password, config.security.saltRounds);
 
-    // Check if username or email is already in use
-    const [err, other] = await query(`
-        SELECT username, email
-            FROM user
-            WHERE username = :username OR email = :email
-    `, value);
-
-    if (!err && other.length) {
-        const [user] = other;
-
-        // Check if username or email were already in use
-        if (user.username === value.username) {
-            return res.error('Username is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
-        } else if (user.email === value.email) {
-            return res.error('Email is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
-        }
-
-        // I have no Idea how we would get here
-        return res.sendStatus(500);
-    }
-
     // Update user in db
     // TODO: Invalidate all sessions?
-    const [qerr, qres] = await query(`
-        INSERT INTO user (
-            type, state, email, username, password,
-            transfer_limit_period, transfer_limit_start, transfer_limit_end, transfer_limit_bytes
-        ) VALUES (
-           :type, :state, :email, :username, :password,
-           :transfer_limit_period, :transfer_limit_start, :transfer_limit_end, :transfer_limit_bytes
-        )
-    `, value).then(() => query(`
-        SELECT ${config.db.exposed.user.join(',')}
-            FROM user
-            WHERE username = ?
-            LIMIT 1
-    `, value.username));
+    return db.user.create({
+        select: config.db.exposed.user,
+        data: value
+    }).then(data => {
+        return res.respond(data);
+    }).catch(e => {
+        if (e.code === 'P2002') {
+            const field = e.meta.target;
 
-    if (qerr || !qres.length) {
-        return res.sendStatus(500);
-    }
+            if (field === 'username') {
+                return res.error('This username is already in use.', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
+            } else if (field === 'email') {
+                return res.error('This email is already in use.', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
+            }
+        }
 
-    res.respond(qres[0]);
-};
+        throw e;
+    });
+});

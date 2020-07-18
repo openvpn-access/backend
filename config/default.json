@@ -5,26 +5,21 @@
         "apiEndpoint": "/api"
     },
     "db": {
-        "host": "localhost",
-        "port": 3306,
-        "user": "root",
-        "password": "password",
-        "database": "openvpn_access",
         "exposed": {
-            "user": [
-                "id",
-                "created_at",
-                "updated_at",
-                "type",
-                "state",
-                "email",
-                "email_verified",
-                "username",
-                "transfer_limit_period",
-                "transfer_limit_start",
-                "transfer_limit_end",
-                "transfer_limit_bytes"
-            ]
+            "user": {
+                "id": true,
+                "created_at": true,
+                "updated_at": true,
+                "type": true,
+                "state": true,
+                "email": true,
+                "email_verified": true,
+                "username": true,
+                "transfer_limit_period": true,
+                "transfer_limit_start": true,
+                "transfer_limit_end": true,
+                "transfer_limit_bytes": true
+            }
         }
     },
     "security": {

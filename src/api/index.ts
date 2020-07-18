@@ -2,11 +2,11 @@ import {Router} from 'express';
 import {deleteUser} from './endpoints/DeleteUser';
 import {getUser} from './endpoints/GetUser';
 import {getUserStats} from './endpoints/GetUserStats';
+import {patchUser} from './endpoints/PatchUser';
 import {postLogin} from './endpoints/PostLogin';
 import {postUserSearch} from './endpoints/PostUserSearch';
 import {putUser} from './endpoints/PutUser';
 import {auth} from './middleware/auth';
-import {patchUser} from './endpoints/PatchUser';
 
 /**
  * Returns a router will all api-related endpoints bound to it.

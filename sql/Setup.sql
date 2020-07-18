@@ -94,7 +94,7 @@ CREATE TABLE web_session (
     created_at date NOT NULL DEFAULT CURDATE(),
 
     # Session key
-    token tinytext NOT NULL,
+    token tinytext NOT NULL UNIQUE,
 
     # Constraints
     PRIMARY KEY (id),

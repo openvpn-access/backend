@@ -1,11 +1,10 @@
 import Joi from '@hapi/joi';
 import {compare, hash} from 'bcrypt';
-import {Request, Response} from 'express';
 import {config} from '../../config';
-import {query} from '../../db';
-import {DBUser} from '../../db/types';
+import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
+import {endpoint} from '../framework';
 
 const Payload = Joi.object({
     type: Joi.string()
@@ -35,7 +34,7 @@ const Payload = Joi.object({
     current_password: Joi.string()
 });
 
-export const patchUser = async (req: Request, res: Response): Promise<unknown> => {
+export const patchUser = endpoint(async (req, res) => {
     const {error, value} = Payload.validate(req.body);
     if (error) {
         return res.error(error, Status.BAD_REQUEST, ErrorCode.INVALID_PAYLOAD);
@@ -65,8 +64,11 @@ export const patchUser = async (req: Request, res: Response): Promise<unknown> =
     }
 
     // Find user to update
-    const [, targetList] = await query('SELECT * FROM user WHERE username = ?', [user]);
-    if (!targetList.length) {
+    const currentUser = await db.user.findOne({
+        where: {username: user}
+    });
+
+    if (!currentUser) {
         return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 
@@ -75,59 +77,29 @@ export const patchUser = async (req: Request, res: Response): Promise<unknown> =
         value.password = await hash(value.password, config.security.saltRounds);
     }
 
-    const updatedUser = {
-        _target: user,
-        ...targetList[0],
-        ...value
-    } as DBUser;
-
-    // Check if username or email is already in use
-    const [err, other] = await query(`
-        SELECT username, email
-            FROM user
-            WHERE username != :_target
-              AND (username = :username OR email = :email)
-    `, updatedUser);
-
-    if (!err && other.length) {
-        const [user] = other;
-
-        // Check if username or email were already in use
-        if (user.username === updatedUser.username) {
-            return res.error('Username is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
-        } else if (user.email === updatedUser.email) {
-            return res.error('Email is already in use', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
-        }
-
-        // I have no Idea how we would get here
-        return res.sendStatus(500);
-    }
-
     // Update user in db
     // TODO: Invalidate all sessions?
-    const [qerr, qres] = await query(`
-        UPDATE user
-            SET username = :username,
-                email = :email,
-                type = :type,
-                state = :state,
-                password = :password,
-                transfer_limit_period = :transfer_limit_period,
-                transfer_limit_start = :transfer_limit_start,
-                transfer_limit_end = :transfer_limit_end,
-                transfer_limit_bytes = :transfer_limit_bytes
-            WHERE username = :_target;
-    `, updatedUser)
-        .then(() => query(`
-            SELECT ${config.db.exposed.user.join(',')}
-                FROM user
-                WHERE username = ?
-                LIMIT 1
-        `, updatedUser.username));
+    return db.user.update({
+        select: config.db.exposed.user,
+        data: {...currentUser, ...value},
+        where: {
+            username: currentUser.username
+        }
+    }).then(data => {
+        return res.respond(data);
+    }).catch(e => {
 
-    if (qerr || !qres.length) {
-        return res.sendStatus(500);
-    }
+        // TODO: This code is a duplicate as seen in PutUser, abstract that somehow
+        if (e.code === 'P2002') {
+            const field = e.code.meta.target;
 
-    res.respond(qres[0]);
-};
+            if (field === 'username') {
+                return res.error('This username is already in use.', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
+            } else if (field === 'email') {
+                return res.error('This email is already in use.', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
+            }
+        }
+
+        throw e;
+    });
+});

@@ -1,10 +1,10 @@
 import Joi from '@hapi/joi';
-import {Request, Response} from 'express';
 import {config} from '../../config';
-import {query} from '../../db';
+import {db} from '../../db';
 import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
+import {endpoint} from '../framework';
 
 const Payload = Joi.object({
     term: Joi.string()
@@ -15,7 +15,7 @@ const Payload = Joi.object({
         .default(100)
 });
 
-export const postUserSearch = async (req: Request, res: Response): Promise<unknown> => {
+export const postUserSearch = endpoint(async (req, res) => {
     const {error, value} = Payload.validate(req.body);
 
     if (error) {
@@ -28,16 +28,15 @@ export const postUserSearch = async (req: Request, res: Response): Promise<unkno
         return res.error('Not allowed.', Status.UNAUTHORIZED, ErrorCode.NOT_ADMIN);
     }
 
-    const [, qres] = await query(`
-        SELECT ${config.db.exposed.user.join(',')}
-            FROM user
-            WHERE username LIKE :term
-               OR email LIKE :term
-            LIMIT :limit
-    `, {
-        limit: value.limit,
-        term: `%${value.term}%`
+    const users = await db.user.findMany({
+        select: config.db.exposed.user,
+        where: {
+            OR: [
+                {username: {contains: value.term}},
+                {email: {contains: value.term}}
+            ]
+        }
     });
 
-    res.respond(qres);
-};
+    return res.respond(users);
+});

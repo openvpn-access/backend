@@ -2,7 +2,7 @@ import 'jest-extended';
 import request from 'supertest';
 import {app} from '../../src';
 import {Status} from '../../src/api/enums/Status';
-import {query} from '../../src/db';
+import {db} from '../../src/db';
 
 let token: string | null = null;
 
@@ -16,21 +16,22 @@ beforeAll(async () => {
         .then(res => token = res.body.token);
 
     // Add new user
-    await query(`
-        INSERT INTO user (
-            username, email, type, password
-        ) VALUES ('mori.maier', 'mori@maier.ada', 'user', 'weo')
-    `);
+    await db.user.create({
+        data: {
+            username: 'mori.maier',
+            email: 'mori@maier.ada',
+            type: 'user',
+            password: 'weo'
+        }
+    });
 });
 
 afterAll(async () => {
 
     // Clean up user
-    await query(`
-        INSERT INTO user (
-            username, email, type, password
-        ) VALUES ('mori.maier', 'mori@maier.ada', 'user', 'weo')
-    `);
+    await db.user.delete({
+        where: {username: 'mori.noma'}
+    });
 });
 
 describe('PATCH /api/users', () => {
