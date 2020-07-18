@@ -21,7 +21,13 @@ const Payload = Joi.object({
 
     sort: Joi.string()
         .valid('id', 'created_at', 'updated_at', 'type', 'state', 'email', 'email_verified', 'username')
-        .default('id')
+        .default('id'),
+
+    type: Joi.string()
+        .valid('user', 'admin'),
+
+    state: Joi.string()
+        .valid('activated', 'pending', 'deactivated')
 });
 
 // TODO: Add more fields
@@ -37,10 +43,11 @@ export const getUser = endpoint(async (req, res) => {
         return res.error('Not allowed.', Status.UNAUTHORIZED, ErrorCode.NOT_ADMIN);
     }
 
-    const {page, per_page, sort} = value;
+    const {page, per_page, sort, ...additionalFilter} = value;
     const offset = (page - 1) * per_page;
     const users = await db.user.findMany({
         select: config.db.exposed.user,
+        where: additionalFilter,
         orderBy: {[sort]: 'desc'},
         skip: offset,
         take: per_page
