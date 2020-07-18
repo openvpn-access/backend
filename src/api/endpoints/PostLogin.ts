@@ -1,4 +1,4 @@
-import Joi from '@hapi/joi';
+import Joi from 'joi';
 import bcrypt from 'bcrypt';
 import {config} from '../../config';
 import {db} from '../../db';

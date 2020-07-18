@@ -1,4 +1,4 @@
-import Joi from '@hapi/joi';
+import Joi from 'joi';
 import {config} from '../../config';
 import {db} from '../../db';
 import {DBUser} from '../../db/types';

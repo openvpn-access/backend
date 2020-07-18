@@ -1,4 +1,4 @@
-import Joi from '@hapi/joi';
+import Joi from 'joi';
 import {hash} from 'bcrypt';
 import {config} from '../../config';
 import {db} from '../../db';
@@ -16,19 +16,19 @@ const Payload = Joi.object({
         .default('pending'),
 
     email: Joi.string()
-        .email({tlds: false})
+        .email()
         .required(),
 
     username: Joi.string()
         .min(3)
         .max(50)
-        .pattern(/^[\w.]+$/)
+        .regex(/^[\w.]+$/)
         .required(),
 
     password: Joi.string()
         .min(8)
         .max(50)
-        .pattern(/^[^\s]+$/)
+        .regex(/^[^\s]+$/)
         .required(),
 
     transfer_limit_period: Joi.alternatives(Joi.number(), null).default(null),

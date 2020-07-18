@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {ValidationError} from '@hapi/joi';
+import {ValidationError} from 'joi';
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCode} from './enums/ErrorCode';
 import {Status} from './enums/Status';
