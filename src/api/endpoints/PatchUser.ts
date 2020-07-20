@@ -41,35 +41,32 @@ export const patchUser = endpoint(async (req, res) => {
     }
 
     const caller = req.session.user;
-    const {user} = req.params;
+    const {id} = req.params;
+
+    // Find user to update
+    const toPatch = await db.user.findOne({where: {id: Number(id)}});
+    if (!toPatch) {
+        return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
+    }
 
     // The administrator cannot change its username
-    if (user === 'admin' && caller.username === 'admin' && value.username !== undefined && value.username !== 'admin') {
+    if (toPatch.type === 'admin' && caller.username === 'admin' && value.username !== undefined && value.username !== 'admin') {
         return res.error('The admin cannot change its username.', Status.FORBIDDEN, ErrorCode.LOCKED_USERNAME);
     }
 
     // Users can only change themselves
-    if (caller.type === 'user' && caller.username !== user) {
+    if (caller.type === 'user' && caller.username !== toPatch.username) {
         return res.error('Users can only change themselves.', Status.FORBIDDEN, ErrorCode.NOT_ADMIN);
     }
 
     // Administrators can only change non-password fields
-    if (caller.type === 'admin' && caller.username !== user && value.password !== undefined) {
+    if (caller.type === 'admin' && caller.username !== toPatch.username && value.password !== undefined) {
         return res.error('Password cannot be changed by administrators.', Status.FORBIDDEN, ErrorCode.LOCKED_PASSWORD);
     }
 
     // Validate password
     if (value.current_password && !(await compare(value.current_password, caller.password))) {
         return res.error('Invalid password', Status.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);
-    }
-
-    // Find user to update
-    const currentUser = await db.user.findOne({
-        where: {username: user}
-    });
-
-    if (!currentUser) {
-        return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 
     // pre-process password
@@ -81,9 +78,9 @@ export const patchUser = endpoint(async (req, res) => {
     // TODO: Invalidate all sessions?
     return db.user.update({
         select: config.db.exposed.user,
-        data: {...currentUser, ...value},
+        data: {...toPatch, ...value},
         where: {
-            username: currentUser.username
+            username: toPatch.username
         }
     }).then(data => {
         return res.respond(data);

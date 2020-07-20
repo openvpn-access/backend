@@ -18,8 +18,8 @@ export const api = (): Router => {
     router.get('/users', auth, getUser);
     router.put('/users', auth, putUser);
     router.get('/users/stats', auth, getUserStats);
-    router.patch('/users/:user', auth, patchUser);
-    router.delete('/users/:user', auth, deleteUser);
+    router.patch('/users/:id', auth, patchUser);
+    router.delete('/users/:id', auth, deleteUser);
 
     return router;
 };

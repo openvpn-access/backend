@@ -5,7 +5,7 @@ import {endpoint} from '../framework';
 
 export const deleteUser = endpoint(async (req, res) => {
     const caller = req.session.user;
-    const {user} = req.params;
+    const {id} = req.params;
 
     // Only admins can delete users
     if (caller.username !== 'admin') {
@@ -13,19 +13,16 @@ export const deleteUser = endpoint(async (req, res) => {
     }
 
     // The root 'admin' cannot be deleted
-    if (user === 'admin') {
-        return res.error('The user \'admin\' cannot be deleted.', Status.FORBIDDEN, ErrorCode.LOCKED_USERNAME);
-    }
-
-    // Check if username or email is already in use
-    // TODO: 'ON DELETE CASCADE' ??
-    const deltedUser = await db.user.delete({
-        where: {username: user}
-    });
-
-    if (!deltedUser) {
+    const toDelete = await db.user.findOne({where: {id: Number(id)}});
+    if (!toDelete) {
         return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 
+    if (toDelete.username === 'admin') {
+        return res.error('The user \'admin\' cannot be deleted.', Status.FORBIDDEN, ErrorCode.LOCKED_USERNAME);
+    }
+
+    // Delete user
+    await db.user.delete({where: {id: toDelete.id}});
     return res.respond();
 });
