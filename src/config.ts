@@ -3,7 +3,6 @@ import defaultConfig from '../config/default.json';
 import developmentConfig from '../config/development.json';
 import productionConfig from '../config/production.json';
 import testConfig from '../config/test.json';
-import {LogLevel} from './logging';
 
 type Config = {
     server: {
@@ -13,6 +12,7 @@ type Config = {
     };
 
     db: {
+        url: string;
         exposed: {
             user: Record<string, boolean>;
         };
@@ -26,8 +26,7 @@ type Config = {
     };
 
     logs: {
-        logUserAgent: boolean;
-        logLevels: Array<LogLevel>;
+        logLevels: Array<string>;
     };
 }
 
@@ -36,11 +35,16 @@ const sourceConfig = env === 'production' ? productionConfig :
     env === 'development' ? developmentConfig :
         testConfig;
 
-export const config = deepmerge(
-    defaultConfig, sourceConfig,
+export const config = deepmerge<Config>(
+    defaultConfig,
+    sourceConfig,
     {
         arrayMerge(destinationArray, sourceArray) {
             return sourceArray;
         }
     }
-) as Config;
+);
+
+// Inject prisma env-variable
+// TODO: Update if status of https://github.com/prisma/prisma/issues/3038 changes
+process.env.DATABASE_URL = config.db.url;

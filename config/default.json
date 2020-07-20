@@ -5,6 +5,7 @@
         "apiEndpoint": "/api"
     },
     "db": {
+        "url": "mysql://root:password@localhost:3306/openvpn_access?schema=public",
         "exposed": {
             "user": {
                 "id": true,
@@ -29,7 +30,6 @@
         "loginAttemptsTimeRange": 3600
     },
     "logs": {
-        "logUserAgent": true,
         "logLevels": [
             "FATAL",
             "ERROR",

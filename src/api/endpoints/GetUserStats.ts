@@ -1,11 +1,10 @@
 import {db} from '../../db';
-import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {endpoint} from '../framework';
 
 export const getUserStats = endpoint(async (req, res) => {
-    const caller = req.session.user as DBUser;
+    const caller = req.session.user;
 
     // Only admins are allowed to fetch users
     if (caller.type !== 'admin') {

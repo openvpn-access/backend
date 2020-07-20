@@ -1,7 +1,6 @@
 import Joi from 'joi';
 import {config} from '../../config';
 import {db} from '../../db';
-import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {endpoint} from '../framework';
@@ -45,7 +44,7 @@ export const getUser = endpoint(async (req, res) => {
     }
 
     // Only admins are allowed to fetch users
-    const caller = req.session.user as DBUser;
+    const caller = req.session.user;
     if (caller.type !== 'admin') {
         return res.error('Not allowed.', Status.UNAUTHORIZED, ErrorCode.NOT_ADMIN);
     }

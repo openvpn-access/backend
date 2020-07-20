@@ -1,6 +1,5 @@
-import {config} from '../../config';
+import * as prism from '@prisma/client';
 import {db} from '../../db';
-import {DBUser} from '../../db/types';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {middleware} from '../framework';
@@ -8,7 +7,7 @@ import {middleware} from '../framework';
 declare module 'express-serve-static-core' {
     interface Request {
         session: {
-            user: DBUser;
+            user: prism.user;
         }
     }
 }
@@ -28,9 +27,7 @@ export const auth = middleware(async (req, res) => {
         where: {token},
         select: {
             token: true,
-            user: {
-                select: config.db.exposed.user
-            }
+            user: true
         }
     });
 
@@ -38,5 +35,5 @@ export const auth = middleware(async (req, res) => {
         return res.error('Invalid baerer token', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
     }
 
-    req.session = {user: session.user as unknown as DBUser};
+    req.session = {user: session.user};
 });
