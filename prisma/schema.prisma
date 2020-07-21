@@ -8,7 +8,7 @@ datasource db {
 }
 
 model user {
-  created_at            DateTime            @default(dbgenerated())
+  created_at            DateTime            @default(now())
   email                 String              @unique
   email_verified        Boolean             @default(false)
   id                    Int                 @default(autoincrement()) @id
@@ -28,7 +28,7 @@ model user {
 }
 
 model vpn_login_attempt {
-  created_at DateTime                @default(dbgenerated())
+  created_at DateTime                @default(now())
   id         Int                     @default(autoincrement()) @id
   ip_addr    String
   state      vpn_login_attempt_state
@@ -41,7 +41,7 @@ model vpn_login_attempt {
 
 model vpn_session {
   closed_at   DateTime?
-  created_at  DateTime  @default(dbgenerated())
+  created_at  DateTime  @default(now())
   id          Int       @default(autoincrement()) @id
   ip_addr     String
   transferred Int       @default(0)
@@ -52,7 +52,7 @@ model vpn_session {
 }
 
 model web_login_attempt {
-  created_at DateTime                @default(dbgenerated())
+  created_at DateTime                @default(now())
   id         Int                     @default(autoincrement()) @id
   ip_addr    String
   state      web_login_attempt_state
@@ -64,7 +64,7 @@ model web_login_attempt {
 }
 
 model web_session {
-  created_at DateTime @default(dbgenerated())
+  created_at DateTime @default(now())
   id         Int      @default(autoincrement()) @id
   ip_addr    String
   token      String   @unique

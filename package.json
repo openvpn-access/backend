@@ -16,7 +16,9 @@
         "lint:ts:fix": "eslint src/**/*.{js,ts} tests/**/*.{js,ts} --fix",
         "lint:types": "tsc --project tsconfig.json --noEmit",
         "lint:fix": "npm run lint:ts:fix && npm run lint:types",
-        "dry": "npm run lint:fix && npm test"
+        "dry": "npm run lint:fix && npm test",
+        "prisma:introspect": "prisma introspect",
+        "prisma:generate": "prisma generate"
     },
     "devDependencies": {
         "@prisma/cli": "^2.2.2",

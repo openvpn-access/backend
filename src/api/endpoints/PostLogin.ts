@@ -71,7 +71,7 @@ export const postLogin = endpoint(async (req, res) => {
             username: id,
             state: 'fail',
             created_at: {
-                lt: new Date(Date.now() - config.security.loginAttemptsTimeRange * 1000)
+                gt: new Date(Date.now() - config.security.loginAttemptsTimeRange * 1000)
             }
         }
     });
