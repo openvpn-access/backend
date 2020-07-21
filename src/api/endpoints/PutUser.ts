@@ -11,9 +11,7 @@ const Payload = Joi.object({
         .valid('user', 'admin')
         .required(),
 
-    state: Joi.string()
-        .valid('activated', 'pending', 'deactivated')
-        .default('pending'),
+    activated: Joi.boolean(),
 
     email: Joi.string()
         .email()

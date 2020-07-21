@@ -12,7 +12,7 @@
                 "created_at": true,
                 "updated_at": true,
                 "type": true,
-                "state": true,
+                "activated": true,
                 "email": true,
                 "email_verified": true,
                 "username": true,

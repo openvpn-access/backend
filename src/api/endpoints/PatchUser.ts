@@ -1,5 +1,5 @@
-import Joi from 'joi';
 import {compare, hash} from 'bcrypt';
+import Joi from 'joi';
 import {config} from '../../config';
 import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
@@ -10,8 +10,7 @@ const Payload = Joi.object({
     type: Joi.string()
         .valid('user', 'admin'),
 
-    state: Joi.string()
-        .valid('activated', 'pending', 'deactivated'),
+    activated: Joi.boolean(),
 
     email: Joi.string()
         .email(),

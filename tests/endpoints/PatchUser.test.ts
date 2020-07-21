@@ -42,14 +42,13 @@ describe('PATCH /api/users', () => {
             .set('Authorization', `Baerer ${token}`)
             .send({
                 'username': 'mori.noma',
-                'email': 'noa@muxa.se',
-                'type': 'admin',
-                'state': 'deactivated'
+                'email': 'noa@muxa.com',
+                'type': 'admin'
             })
             .expect(Status.OK)
             .expect(res => {
                 expect(res.body.username).toEqual('mori.noma');
-                expect(res.body.email).toEqual('noa@muxa.se');
+                expect(res.body.email).toEqual('noa@muxa.com');
                 expect(res.body.type).toEqual('admin');
                 expect(res.body.state).toEqual('deactivated');
             });

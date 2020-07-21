@@ -8,12 +8,16 @@ datasource db {
 }
 
 model user {
+  activated             Boolean?            @default(true)
   created_at            DateTime            @default(now())
   email                 String              @unique
-  email_verified        Boolean             @default(false)
+  email_verified        Boolean?            @default(false)
   id                    Int                 @default(autoincrement()) @id
+  ovpn_ca               String?
+  ovpn_cert             String?
+  ovpn_key              String?
+  ovpn_tls_crypt        String?
   password              String
-  state                 user_state?         @default(pending)
   transfer_limit_bytes  Int?
   transfer_limit_end    DateTime?
   transfer_limit_period Int?
@@ -72,12 +76,6 @@ model web_session {
   user       user     @relation(fields: [user_id], references: [id])
 
   @@index([user_id], name: "user_id")
-}
-
-enum user_state {
-  activated
-  pending
-  deactivated
 }
 
 enum user_type {

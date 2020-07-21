@@ -18,12 +18,12 @@ CREATE TABLE user (
     # will only be able to change their credentials and view stats.
     type enum ('admin', 'user') NOT NULL,
 
-    # Account state
-    state enum ('activated', 'pending', 'deactivated') DEFAULT 'pending',
+    # If account can be used
+    activated bool DEFAULT true,
 
     # Credentials
     email varchar(320) NOT NULL UNIQUE, # See https://tools.ietf.org/html/rfc3696
-    email_verified bool NOT NULL DEFAULT false,
+    email_verified bool DEFAULT false,
     username tinytext NOT NULL UNIQUE,
     password tinytext NOT NULL,
 
@@ -33,6 +33,12 @@ CREATE TABLE user (
     transfer_limit_start date DEFAULT null, # At when the user will be able to use his account
     transfer_limit_end date DEFAULT null, # Expiry date for this period
     transfer_limit_bytes bigint DEFAULT null, # Amount of bytes the user will be able to use in a single period
+
+    # OVPN Certificate properties
+    ovpn_ca text DEFAULT null, # Certificate authority
+    ovpn_cert text DEFAULT null, # Certificate
+    ovpn_key text DEFAULT null, # Private key
+    ovpn_tls_crypt text DEFAULT null, # 2048 bit OpenVPN static key
 
     # Constraints
     PRIMARY KEY (id)
@@ -129,12 +135,13 @@ CREATE TABLE vpn_session (
   COLLATE utf8_general_ci;
 
 
+
+
 # ==== Create admin user with default password ==== #
 # This user is protected by a trigger and cannot get removed or its username changed.
-INSERT INTO user (type, state, email, username, password)
+INSERT INTO user (type, email, username, password)
 VALUES (
     'admin',
-    'activated',
     'admin@vpnaccess.com',
     'admin',
     '$2b$10$w9zB.eyB.gNOfMblxVMcvOo09GFqchJpqZukXKH3R84f1X9YsYDPq' # (???) 'password'

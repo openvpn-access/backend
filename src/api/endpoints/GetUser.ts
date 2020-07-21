@@ -29,8 +29,7 @@ const Payload = Joi.object({
     type: Joi.string()
         .valid('user', 'admin'),
 
-    state: Joi.string()
-        .valid('activated', 'pending', 'deactivated'),
+    email_verified: Joi.boolean(),
 
     // Search query
     search: Joi.string()
