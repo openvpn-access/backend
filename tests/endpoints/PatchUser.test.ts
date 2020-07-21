@@ -14,16 +14,6 @@ beforeAll(async () => {
         .send({id: 'admin', password: 'password'})
         .expect(Status.OK)
         .then(res => token = res.body.token);
-
-    // Add new user
-    await db.user.create({
-        data: {
-            username: 'mori.maier',
-            email: 'mori@maier.ada',
-            type: 'user',
-            password: 'weo'
-        }
-    });
 });
 
 afterAll(async () => {
@@ -36,8 +26,19 @@ afterAll(async () => {
 
 describe('PATCH /api/users', () => {
     it('Should change the username, email, type and state of an user', async () => {
+
+        // Add new user
+        const user = await db.user.create({
+            data: {
+                username: 'mori.maier',
+                email: 'mori@maier.ada',
+                type: 'user',
+                password: 'weo'
+            }
+        });
+
         return request(app)
-            .patch('/api/users/mori.maier')
+            .patch(`/api/users/${user.id}`)
             .set('Authorization', `Baerer ${token}`)
             .send({
                 'username': 'mori.noma',

@@ -14,23 +14,24 @@ beforeAll(async () => {
         .send({id: 'admin', password: 'password'})
         .expect(Status.OK)
         .then(res => token = res.body.token);
-
-    // Add new user
-    await db.user.create({
-        data: {
-            username: 'deleteme',
-            email: 'delete@me.baz',
-            type: 'user',
-            password: 'hi'
-        }
-    });
 });
 
 describe('DELETE /api/users', () => {
     it('Should remove a user', async () => {
+
+        // Add new user
+        const user = await db.user.create({
+            data: {
+                username: 'deleteme',
+                email: 'delete@me.baz',
+                type: 'user',
+                password: 'hi'
+            }
+        });
+
         return request(app)
-            .delete('/api/users/deleteme')
+            .delete(`/api/users/${user.id}`)
             .set('Authorization', `Baerer ${token}`)
-            .expect(Status.NO_CONTENT);
+            .expect(Status.OK);
     });
 });

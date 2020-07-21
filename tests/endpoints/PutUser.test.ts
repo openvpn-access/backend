@@ -33,7 +33,7 @@ describe('PUT /api/users', () => {
             .set('Authorization', `Baerer ${token}`)
             .send({
                 'username': 'foobar',
-                'email': 'foo@bar.baz',
+                'email': 'foo@bar.com',
                 'type': 'user',
                 'password': 'foobazbam'
             })
@@ -46,7 +46,7 @@ describe('PUT /api/users', () => {
             .set('Authorization', `Baerer ${token}`)
             .send({
                 'username': 'foobar',
-                'email': 'foo@bdaar.baz',
+                'email': 'foo@bdaar.com',
                 'type': 'user',
                 'password': 'foobazbam'
             })
@@ -60,7 +60,7 @@ describe('PUT /api/users', () => {
             .set('Authorization', `Baerer ${token}`)
             .send({
                 'username': 'foobasr',
-                'email': 'foo@bar.baz',
+                'email': 'foo@bar.com',
                 'type': 'user',
                 'password': 'foobazbam'
             })
