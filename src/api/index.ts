@@ -1,5 +1,6 @@
 import {Router} from 'express';
 import {deleteUser} from './endpoints/DeleteUser';
+import {getLoginAttemptWeb} from './endpoints/GetLoginAttemptWeb';
 import {getUser} from './endpoints/GetUser';
 import {getUserStats} from './endpoints/GetUserStats';
 import {patchUser} from './endpoints/PatchUser';
@@ -20,6 +21,7 @@ export const api = (): Router => {
     router.get('/users/stats', auth, getUserStats);
     router.patch('/users/:id', auth, patchUser);
     router.delete('/users/:id', auth, deleteUser);
+    router.get('/login-attempts/web', auth, getLoginAttemptWeb);
 
     return router;
 };

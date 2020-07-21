@@ -20,6 +20,14 @@
                 "transfer_limit_start": true,
                 "transfer_limit_end": true,
                 "transfer_limit_bytes": true
+            },
+            "web_login_attempt": {
+                "id": true,
+                "user_id": true,
+                "created_at": true,
+                "state": true,
+                "username": true,
+                "ip_addr": true
             }
         }
     },

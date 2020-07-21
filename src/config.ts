@@ -15,6 +15,7 @@ type Config = {
         url: string;
         exposed: {
             user: Record<string, boolean>;
+            web_login_attempt: Record<string, boolean>;
         };
     };
 
@@ -44,7 +45,3 @@ export const config = deepmerge<Config>(
         }
     }
 );
-
-// Inject prisma env-variable
-// TODO: Update if status of https://github.com/prisma/prisma/issues/3038 changes
-process.env.DATABASE_URL = config.db.url;
