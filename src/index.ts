@@ -20,7 +20,7 @@ if (env === 'development') {
 }
 
 // Register api
-app.use('/api', api());
+app.use('/api/v1', api());
 
 // TODO: Refactor this, that looks ugly
 if (env !== 'test') {
