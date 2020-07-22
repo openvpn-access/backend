@@ -5,6 +5,7 @@ import {getUser} from './endpoints/GetUser';
 import {getUserStats} from './endpoints/GetUserStats';
 import {patchUser} from './endpoints/PatchUser';
 import {postLogin} from './endpoints/PostLogin';
+import {postLogout} from './endpoints/PostLogout';
 import {putUser} from './endpoints/PutUser';
 import {auth} from './middleware/auth';
 
@@ -16,6 +17,7 @@ export const api = (): Router => {
 
     // Register routes
     router.post('/login', postLogin);
+    router.post('/logout', auth, postLogout);
     router.get('/users', auth, getUser);
     router.put('/users', auth, putUser);
     router.get('/users/stats', auth, getUserStats);

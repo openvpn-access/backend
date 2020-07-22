@@ -7,6 +7,7 @@ import {middleware} from '../framework';
 declare module 'express-serve-static-core' {
     interface Request {
         session: {
+            token: string;
             user: prism.user;
         }
     }
@@ -35,5 +36,5 @@ export const auth = middleware(async (req, res) => {
         return res.error('Invalid baerer token', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
     }
 
-    req.session = {user: session.user};
+    req.session = session;
 });
