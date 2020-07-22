@@ -4,6 +4,7 @@
         "moduleResolution": "node",
         "esModuleInterop": true,
         "noImplicitAny": false,
+        "skipLibCheck": true,
         "module": "commonjs",
         "target": "ES2019",
         "strict": true,

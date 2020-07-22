@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {ValidationError} from 'joi';
 import {NextFunction, Request, Response} from 'express';
+import {ValidationError} from 'joi';
 import {ErrorCode} from './enums/ErrorCode';
 import {Status} from './enums/Status';
 
@@ -17,6 +17,7 @@ export type APIError = {
     code: number;
 };
 
+const logErrors = ['test', 'development'].includes(process.env.NODE_ENV);
 const resTools = {
     respond(body?: any, status = Status.OK): APIResponse {
         return {
@@ -53,9 +54,17 @@ export type Middleware = (req: Request, tools: Omit<ResponseTools, 'respond'>) =
  * @param endpoint Implementation
  */
 export const endpoint = (endpoint: Endpoint) => async (req: Request, res: Response): Promise<void> => {
-    const data = await endpoint(req, resTools).catch(() => resTools.internalError());
-    const {status, body} = data;
+    const data = await endpoint(req, resTools).catch(err => {
 
+        /* eslint-disable no-console */
+        if (logErrors) {
+            console.error(err);
+        }
+
+        return resTools.internalError();
+    });
+
+    const {status, body} = data;
     switch (data.kind) {
         case 'response': {
             res.status(status);
@@ -85,7 +94,15 @@ export const endpoint = (endpoint: Endpoint) => async (req: Request, res: Respon
  * @param middleware
  */
 export const middleware = (middleware: Middleware) => async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const data = await middleware(req, resTools).catch(() => resTools.internalError());
+    const data = await middleware(req, resTools).catch(err => {
+
+        /* eslint-disable no-console */
+        if (logErrors) {
+            console.error(err);
+        }
+
+        return resTools.internalError();
+    });
 
     if (data) {
         const {status, body, code} = data;
