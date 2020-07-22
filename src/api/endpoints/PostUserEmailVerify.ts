@@ -22,7 +22,7 @@ export const postUserEmailVerify = endpoint(async (req, res) => {
     });
 
     if (!token) {
-        return res.error(`Invalid email verification token`, Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
+        return res.error('Invalid email verification token', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
     }
 
     // Mark this user's email address as valid

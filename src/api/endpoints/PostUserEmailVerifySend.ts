@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import {config} from '../../config';
 import {db} from '../../db';
-import {sendMail} from '../../mail';
+import {emailTemplates, sendMail} from '../../mail';
 import {secureUid} from '../../utils/uid';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
@@ -30,24 +30,21 @@ export const postUserEmailVerifySend = endpoint(async (req, res) => {
         const token = await db.user_email_verification.create({
             data: {
                 user: {connect: {id: user.id}},
-                token: await secureUid(config.security.apiKeySize),
+                token: await secureUid(config.security.apiKeySize)
             }
         });
 
         const host = config.server.host + (isDev ? ':3000' : '');
-        const url = `${isDev ? 'http' : 'https'}://${host}/verify-email?email=${value.email}&token=${token.token}`;
+        const link = `${isDev ? 'http' : 'https'}://${host}/verify-email?email=${value.email}&token=${token.token}`;
 
         // Send email TODO: Make that more pretty
         await sendMail({
             to: user.email,
             subject: 'Please verify your vpn-access email address',
-            text: `
-You are receiving this because you (or someone else) requested that the email address of the '${user.username}' openvpn-access should be changed.
-
-To confirm that this is the correct email for the '${user.username}' account, click the following link:
-
-${url}
-            `.trim(),
+            html: emailTemplates.verify({
+                host, link,
+                username: user.username
+            })
         });
     }
 
