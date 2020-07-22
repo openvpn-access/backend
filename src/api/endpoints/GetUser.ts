@@ -30,6 +30,7 @@ const Payload = Joi.object({
         .valid('user', 'admin'),
 
     email_verified: Joi.boolean(),
+    activated: Joi.boolean(),
 
     // Search query
     search: Joi.string()
