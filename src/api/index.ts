@@ -6,6 +6,8 @@ import {getUserStats} from './endpoints/GetUserStats';
 import {patchUser} from './endpoints/PatchUser';
 import {postLogin} from './endpoints/PostLogin';
 import {postLogout} from './endpoints/PostLogout';
+import {postUserEmailVerify} from './endpoints/PostUserEmailVerify';
+import {postUserEmailVerifySend} from './endpoints/PostUserEmailVerifySend';
 import {putUser} from './endpoints/PutUser';
 import {auth} from './middleware/auth';
 
@@ -23,6 +25,8 @@ export const api = (): Router => {
     router.get('/users/stats', auth, getUserStats);
     router.patch('/users/:id', auth, patchUser);
     router.delete('/users/:id', auth, deleteUser);
+    router.post('/users/email/verify', postUserEmailVerify);
+    router.post('/users/email/verify/send', postUserEmailVerifySend);
     router.get('/login-attempts/web', auth, getLoginAttemptWeb);
 
     return router;

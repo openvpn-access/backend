@@ -11,6 +11,18 @@ type Config = {
         apiEndpoint: string;
     };
 
+    email: {
+        from: string;
+        transport: {
+            host: string;
+            port: number;
+            auth: {
+                user: string;
+                pass: string;
+            };
+        };
+    };
+
     db: {
         url: string;
         exposed: {

@@ -4,6 +4,17 @@
         "port": 8080,
         "apiEndpoint": "/api"
     },
+    "email": {
+        "from": "\"Mr. Test\" <sender@email.com>",
+        "transport": {
+            "host": "smtp.server",
+            "port": 465,
+            "auth": {
+                "user": "<smtp-username>",
+                "pass": "<smtp-password>"
+            }
+        }
+    },
     "db": {
         "url": "mysql://root:password@localhost:3306/openvpn_access?schema=public",
         "exposed": {

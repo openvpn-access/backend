@@ -77,7 +77,13 @@ export const patchUser = endpoint(async (req, res) => {
     // TODO: Invalidate all sessions?
     return db.user.update({
         select: config.db.exposed.user,
-        data: {...toPatch, ...value},
+        data: {
+            ...toPatch,
+            ...value,
+            ...(value.email && value.email !== toPatch.email && {
+                email_verified: false
+            })
+        },
         where: {
             username: toPatch.username
         }

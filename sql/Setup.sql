@@ -48,6 +48,26 @@ CREATE TABLE user (
   COLLATE utf8_general_ci;
 
 
+# ==== Create user_email_verification table ==== #
+# This table contains a list of tokens used to verify the email of an user.
+#DROP TABLE IF EXISTS user_email_verification;
+CREATE TABLE user_email_verification (
+    id int NOT NULL AUTO_INCREMENT,
+    user_id int NOT NULL,
+    created_at datetime NOT NULL DEFAULT NOW(),
+    
+    # Verification token
+    token tinytext NOT NULL UNIQUE,
+
+    # Constraints
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+) ENGINE = INNODB,
+  AUTO_INCREMENT = 1,
+  CHARACTER SET utf8,
+  COLLATE utf8_general_ci;
+
+
 # ==== Create web-login attempt table ==== #
 #DROP TABLE IF EXISTS web_login_attempt;
 CREATE TABLE web_login_attempt (
