@@ -37,10 +37,10 @@ export const postUserEmailVerifySend = endpoint(async (req, res) => {
         const host = config.server.host + (isDev ? ':3000' : '');
         const link = `${isDev ? 'http' : 'https'}://${host}/verify-email?email=${value.email}&token=${token.token}`;
 
-        // Send email TODO: Make that more pretty
+        // Send email
         await sendMail({
             to: user.email,
-            subject: 'Please verify your vpn-access email address',
+            subject: 'Please verify your openvpn-access email address',
             html: emailTemplates.verify({
                 host, link,
                 username: user.username
