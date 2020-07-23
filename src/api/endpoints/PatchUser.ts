@@ -68,6 +68,9 @@ export const patchUser = endpoint(async (req, res) => {
         return res.error('Invalid password', Status.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);
     }
 
+    // Not part of the user-table
+    delete value.current_password;
+
     // pre-process password
     if (value.password) {
         value.password = await hash(value.password, config.security.saltRounds);
