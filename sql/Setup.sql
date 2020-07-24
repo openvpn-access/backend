@@ -48,19 +48,19 @@ CREATE TABLE user (
   COLLATE utf8_general_ci;
 
 
-# ==== Create user_email_verification table ==== #
-# This table contains a list of tokens used to verify the email of an user.
-#DROP TABLE IF EXISTS user_email_verification;
-CREATE TABLE user_email_verification (
-    id int NOT NULL AUTO_INCREMENT,
+# ==== Create user_access_token table ==== #
+# This table contains a list of tokens used to verify an email or reset a password.
+#DROP TABLE IF EXISTS user_access_token;
+CREATE TABLE user_access_token (
     user_id int NOT NULL,
     created_at datetime NOT NULL DEFAULT NOW(),
+    type enum ('verify-email', 'reset-password') NOT NULL
     
     # Verification token
     token tinytext NOT NULL UNIQUE,
 
     # Constraints
-    PRIMARY KEY (id),
+    PRIMARY KEY (token),
     FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE = INNODB,
   AUTO_INCREMENT = 1,
@@ -153,8 +153,6 @@ CREATE TABLE vpn_session (
   AUTO_INCREMENT = 1,
   CHARACTER SET utf8,
   COLLATE utf8_general_ci;
-
-
 
 
 # ==== Create admin user with default password ==== #

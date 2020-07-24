@@ -4,10 +4,12 @@ import {getLoginAttemptWeb} from './endpoints/GetLoginAttemptWeb';
 import {getUser} from './endpoints/GetUser';
 import {getUserStats} from './endpoints/GetUserStats';
 import {patchUser} from './endpoints/PatchUser';
+import {patchUserPasswordReset} from './endpoints/PatchUserPasswordReset';
 import {postLogin} from './endpoints/PostLogin';
 import {postLogout} from './endpoints/PostLogout';
 import {postUserEmailVerify} from './endpoints/PostUserEmailVerify';
 import {postUserEmailVerifySend} from './endpoints/PostUserEmailVerifySend';
+import {postUserPasswordResetSend} from './endpoints/PostUserPasswordResetSend';
 import {putUser} from './endpoints/PutUser';
 import {auth} from './middleware/auth';
 
@@ -27,6 +29,8 @@ export const api = (): Router => {
     router.delete('/users/:id', auth, deleteUser);
     router.post('/users/email/verify', postUserEmailVerify);
     router.post('/users/email/verify/send', postUserEmailVerifySend);
+    router.post('/users/password/reset', patchUserPasswordReset);
+    router.post('/users/password/reset/send', postUserPasswordResetSend);
     router.get('/login-attempts/web', auth, getLoginAttemptWeb);
 
     return router;

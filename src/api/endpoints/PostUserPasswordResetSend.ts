@@ -12,7 +12,7 @@ const Payload = Joi.object({
 });
 
 const isDev = process.env.NODE_ENV === 'development';
-export const postUserEmailVerifySend = endpoint(async (req, res) => {
+export const postUserPasswordResetSend = endpoint(async (req, res) => {
     const {error, value} = Payload.validate(req.body);
     if (error) {
         return res.error(error, Status.BAD_REQUEST, ErrorCode.INVALID_PAYLOAD);
@@ -23,26 +23,27 @@ export const postUserEmailVerifySend = endpoint(async (req, res) => {
         where: {email: value.email}
     });
 
-    // Send verification email
-    if (user && !user.email_verified) {
+    // Send password-reset email
+    if (user) {
 
         // Create verification token
         const token = await db.user_access_token.create({
             data: {
-                type: 'verify_email',
+                type: 'reset_password',
                 user: {connect: {id: user.id}},
                 token: await secureUid(config.security.apiKeySize)
             }
         });
 
+        // TODO: Use some sort of appname or just plain OpenVPN Access?
         const host = config.server.host + (isDev ? ':3000' : '');
-        const link = `${isDev ? 'http' : 'https'}://${host}/verify-email?email=${value.email}&token=${token.token}`;
+        const link = `${isDev ? 'http' : 'https'}://${host}/reset-password?user=${user.id}&token=${token.token}`;
 
         // Send email
         await sendMail({
             to: user.email,
-            subject: 'Please verify your openvpn-access email address',
-            html: emailTemplates.verifyEmail({
+            subject: 'Password Reset Request for OpenVPN Access',
+            html: emailTemplates.resetPassword({
                 host, link,
                 username: user.username
             })

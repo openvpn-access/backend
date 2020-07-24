@@ -8,36 +8,37 @@ datasource db {
 }
 
 model user {
-  activated               Boolean?                  @default(true)
-  created_at              DateTime                  @default(now())
-  email                   String                    @unique
-  email_verified          Boolean?                  @default(false)
-  id                      Int                       @default(autoincrement()) @id
-  ovpn_ca                 String?
-  ovpn_cert               String?
-  ovpn_key                String?
-  ovpn_tls_crypt          String?
-  password                String
-  transfer_limit_bytes    Int?
-  transfer_limit_end      DateTime?
-  transfer_limit_period   Int?
-  transfer_limit_start    DateTime?
-  type                    user_type
-  updated_at              DateTime                  @default(now())
-  username                String                    @unique
-  user_email_verification user_email_verification[]
-  vpn_login_attempt       vpn_login_attempt[]
-  vpn_session             vpn_session[]
-  web_login_attempt       web_login_attempt[]
-  web_session             web_session[]
+  activated             Boolean?            @default(true)
+  created_at            DateTime            @default(now())
+  email                 String              @unique
+  email_verified        Boolean?            @default(false)
+  id                    Int                 @default(autoincrement()) @id
+  ovpn_ca               String?
+  ovpn_cert             String?
+  ovpn_key              String?
+  ovpn_tls_crypt        String?
+  password              String
+  transfer_limit_bytes  Int?
+  transfer_limit_end    DateTime?
+  transfer_limit_period Int?
+  transfer_limit_start  DateTime?
+  type                  user_type
+  updated_at            DateTime            @default(now())
+  username              String              @unique
+  user_access_token     user_access_token[]
+  vpn_login_attempt     vpn_login_attempt[]
+  vpn_session           vpn_session[]
+  web_login_attempt     web_login_attempt[]
+  web_session           web_session[]
 }
 
-model user_email_verification {
-  created_at DateTime @default(now())
-  id         Int      @default(autoincrement()) @id
-  token      String   @unique
+model user_access_token {
+  created_at DateTime               @default(now())
+  id         Int                    @default(autoincrement()) @id
+  token      String                 @unique
+  type       user_access_token_type
   user_id    Int
-  user       user     @relation(fields: [user_id], references: [id])
+  user       user                   @relation(fields: [user_id], references: [id])
 
   @@index([user_id], name: "user_id")
 }
@@ -92,6 +93,11 @@ model web_session {
 enum user_type {
   admin
   user
+}
+
+enum user_access_token_type {
+  verify_email @map("verify-email")
+  reset_password @map("reset-password")
 }
 
 enum vpn_login_attempt_state {

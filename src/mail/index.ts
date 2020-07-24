@@ -1,6 +1,7 @@
 import {createTransport, SentMessageInfo} from 'nodemailer';
 import {Options} from 'nodemailer/lib/mailer';
 import {config} from '../config';
+import {resetPasswordTemplate} from './templates/reset-password';
 import {verifyEmailTemplate} from './templates/verify-email';
 
 const transporter = createTransport(config.email.transport);
@@ -16,5 +17,6 @@ export const sendMail = (opt: Omit<Options, 'from'>): Promise<SentMessageInfo> =
  * Email-templates. They all take props and return HTML.
  */
 export const emailTemplates = {
-    verify: verifyEmailTemplate
+    verifyEmail: verifyEmailTemplate,
+    resetPassword: resetPasswordTemplate
 };

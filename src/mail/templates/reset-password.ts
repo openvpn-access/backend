@@ -6,7 +6,7 @@ type Props = {
 
 // TODO: Currently github is abused and used as CDN for the logo, fix that (how?)
 
-export const verifyEmailTemplate = (props: Props): string => `
+export const resetPasswordTemplate = (props: Props): string => `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -223,14 +223,10 @@ export const verifyEmailTemplate = (props: Props): string => `
                                             <p style="font-size: 14px; line-height: 1.8; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; word-break: break-word; mso-line-height-alt: 25px; margin: 0;">
                                                 <span style="color: #333f50;">Hey ${props.username},</span></p>
                                             <p style="line-height: 1.8; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; word-break: break-word; font-size: 13px; mso-line-height-alt: 23px; mso-ansi-font-size: 14px; margin: 0;">
-                                                <span style="color: #44546a; font-size: 13px; mso-ansi-font-size: 14px;">An administrator created an account on ${props.host} for you!</span>
+                                                <span style="color: #44546a; font-size: 13px; mso-ansi-font-size: 14px;">Your OpenVPN Access password can be reset by clicking the button below.</span>
                                             </p>
                                             <p style="line-height: 1.8; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; word-break: break-word; font-size: 13px; mso-line-height-alt: 23px; mso-ansi-font-size: 14px; margin: 0;">
-                                                <span style="color: #44546a; font-size: 13px; mso-ansi-font-size: 14px;">Before you get started, we just need to confirm that this email belongs to you. This way you’ll also be able to reset your password in case you forget it.</span>
-                                            </p>
-                                            <p style="line-height: 1.8; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; word-break: break-word; font-size: 13px; mso-line-height-alt: 23px; mso-ansi-font-size: 14px; margin: 0;">
-                                                <span
-                                                    style="color: #44546a; font-size: 13px; mso-ansi-font-size: 14px;">Click below to verify your email:</span>
+                                                <span style="color: #44546a; font-size: 13px; mso-ansi-font-size: 14px;">If you did not request a new password, please ignore this email.</span>
                                             </p>
                                         </div>
                                     </div>
@@ -284,7 +280,7 @@ export const verifyEmailTemplate = (props: Props): string => `
                                         href="${props.link}"
                                         style="-webkit-text-size-adjust: none; text-decoration: none; display: inline-block; color: #fff; background-color: #2597ff; border-radius: 0px; -webkit-border-radius: 0px; -moz-border-radius: 0px; width: auto; width: auto; border-top: 1px solid #2597ff; border-right: 1px solid #2597ff; border-bottom: 1px solid #2597ff; border-left: 1px solid #2597ff; padding-top: 5px; padding-bottom: 5px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align: center; mso-border-alt: none; word-break: keep-all;"
                                         target="_blank"><span style="padding-left:20px;padding-right:20px;font-size:16px;display:inline-block;"><span
-                                        style="font-size: 16px; line-height: 2; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; word-break: break-word; mso-line-height-alt: 32px;">Verify Email</span></span></a>
+                                        style="font-size: 16px; line-height: 2; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; word-break: break-word; mso-line-height-alt: 32px;">Reset Password</span></span></a>
                                         <!--[if mso]></center></v:textbox></v:roundrect></td></tr></table><![endif]-->
                                     </div>
                                     <!--[if (!mso)&(!IE)]><!-->

@@ -87,9 +87,7 @@ export const patchUser = endpoint(async (req, res) => {
                 email_verified: false
             })
         },
-        where: {
-            username: toPatch.username
-        }
+        where: {id: toPatch.id}
     }).then(data => {
         return res.respond(data);
     }).catch(e => {

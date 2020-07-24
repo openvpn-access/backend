@@ -17,11 +17,12 @@ export const postUserEmailVerify = endpoint(async (req, res) => {
     }
 
     // Validate token
-    const token = await db.user_email_verification.findOne({
+    const token = await db.user_access_token.findOne({
         where: {token: value.token}
     });
 
-    if (!token) {
+    // TODO: Manually checking the type might not be the best solution?!
+    if (!token || token.type !== 'verify_email') {
         return res.error('Invalid email verification token', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
     }
 
@@ -32,7 +33,7 @@ export const postUserEmailVerify = endpoint(async (req, res) => {
     });
 
     // Remove all associated, pending email-verifications for this email
-    await db.user_email_verification.deleteMany({
+    await db.user_access_token.deleteMany({
         where: {user_id: token.user_id}
     });
 
