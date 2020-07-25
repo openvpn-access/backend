@@ -379,7 +379,7 @@ export const verifyEmailTemplate = (props: Props): string => `
                                             style="line-height: 1.2; font-size: 12px; color: #555; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; mso-line-height-alt: 14px;">
                                             <p style="font-size: 12px; line-height: 1.2; word-break: break-word; text-align: center; mso-line-height-alt: 14px; margin: 0;">
                                                 <span style="font-size: 12px;"><span style="color: #99aab5;">Sent by ${props.host} •</span> <span
-                                                    style="color: #2597ff;"><a href="https://github.com/openvpn-access" rel="noopener"
+                                                    style="color: #2597ff;"><a href="https://github.com/openvpn-access/openvpn-access" rel="noopener"
                                                                                style="text-decoration: none; color: #2597ff;" target="_blank">GitHub</a> </span><span
                                                     style="color: #99aab5;">• Open Source </span></span></p>
                                         </div>

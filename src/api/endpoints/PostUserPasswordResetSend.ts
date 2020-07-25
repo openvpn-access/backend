@@ -23,6 +23,7 @@ export const postUserPasswordResetSend = endpoint(async (req, res) => {
         where: {email: value.email}
     });
 
+    // TODO: This is an attach-vector: It takes way longer if the email is valid!
     // Send password-reset email
     if (user) {
 
@@ -40,13 +41,17 @@ export const postUserPasswordResetSend = endpoint(async (req, res) => {
         const link = `${isDev ? 'http' : 'https'}://${host}/reset-password?user=${user.id}&token=${token.token}`;
 
         // Send email
-        await sendMail({
+        return sendMail({
             to: user.email,
             subject: 'Password Reset Request for OpenVPN Access',
             html: emailTemplates.resetPassword({
                 host, link,
                 username: user.username
             })
+        }).then(() => {
+            return res.respond();
+        }).catch(() => {
+            return res.error('Failed to send email', Status.UNPROCESSABLE_ENTITY, ErrorCode.EMAIL_FAILED_TO_DELIVER);
         });
     }
 

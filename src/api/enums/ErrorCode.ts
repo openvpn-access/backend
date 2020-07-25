@@ -20,4 +20,5 @@ export enum ErrorCode {
     MISSING_TOKEN = 9,
     USER_NOT_FOUND = 10,
     NOT_ADMIN = 11,
+    EMAIL_FAILED_TO_DELIVER = 12
 }

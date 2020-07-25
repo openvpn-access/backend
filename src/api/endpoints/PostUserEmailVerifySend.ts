@@ -39,13 +39,17 @@ export const postUserEmailVerifySend = endpoint(async (req, res) => {
         const link = `${isDev ? 'http' : 'https'}://${host}/verify-email?email=${value.email}&token=${token.token}`;
 
         // Send email
-        await sendMail({
+        return sendMail({
             to: user.email,
             subject: 'Please verify your openvpn-access email address',
             html: emailTemplates.verifyEmail({
                 host, link,
                 username: user.username
             })
+        }).then(() => {
+            return res.respond();
+        }).catch(() => {
+            return res.error('Failed to send email', Status.UNPROCESSABLE_ENTITY, ErrorCode.EMAIL_FAILED_TO_DELIVER);
         });
     }
 
