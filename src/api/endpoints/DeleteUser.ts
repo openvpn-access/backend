@@ -7,18 +7,18 @@ import {createEndpoint} from '../lib/endpoint';
 
 export const deleteUser = createEndpoint({
     method: 'DELETE',
-    route: '/users/:id',
+    route: '/users/:user_id',
     middleware: bearer,
 
     validation: {
         params: Joi.object({
-            id: Joi.number()
+            user_id: Joi.number()
         })
     },
 
     async handle(req, res) {
         const caller = req.session.user;
-        const {id} = req.params;
+        const {user_id} = req.params;
 
         // Only admins can delete users
         if (caller.username !== 'admin') {
@@ -26,7 +26,7 @@ export const deleteUser = createEndpoint({
         }
 
         // The root 'admin' cannot be deleted
-        const toDelete = await db.user.findOne({where: {id}});
+        const toDelete = await db.user.findOne({where: {id: user_id}});
         if (!toDelete) {
             return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
         }

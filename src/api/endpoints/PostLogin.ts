@@ -13,14 +13,14 @@ export const postLogin = createEndpoint({
 
     validation: {
         body: Joi.object({
-            id: Joi.string(), // TODO: Change to login_id
+            user_id: Joi.string(),
             password: Joi.string(),
             token: Joi.string()
-        }).xor('id', 'token').xor('password', 'token')
+        }).xor('user_id', 'token').xor('password', 'token')
     },
 
     async handle(req, res) {
-        const {id, password, token} = req.body;
+        const {user_id, password, token} = req.body;
 
         // Try loggin in using the token
         if (token) {
@@ -45,8 +45,8 @@ export const postLogin = createEndpoint({
         const [user] = await db.user.findMany({
             where: {
                 OR: [
-                    {username: id},
-                    {email: id}
+                    {username: user_id},
+                    {email: user_id}
                 ]
             }
         });
@@ -57,7 +57,7 @@ export const postLogin = createEndpoint({
             // Save login attempt
             await db.web_login_attempt.create({
                 data: {
-                    username: id,
+                    username: user_id,
                     ip_addr: ipAddr,
                     state: 'fail'
                 }
@@ -69,7 +69,7 @@ export const postLogin = createEndpoint({
         // Check if user exeeded the login-attempt limit
         const loginAttempts = await db.web_login_attempt.count({
             where: {
-                username: id,
+                user_id: user.id,
                 state: 'fail',
                 created_at: {
                     gt: new Date(Date.now() - config.security.loginAttemptsTimeRange * 1000)
@@ -101,7 +101,7 @@ export const postLogin = createEndpoint({
                 data: {
                     user: {connect: {id: user.id}},
                     state: 'pass',
-                    username: id,
+                    username: user.username,
                     ip_addr: ipAddr
                 }
             });
@@ -120,7 +120,7 @@ export const postLogin = createEndpoint({
             data: {
                 user: {connect: {id: user.id}},
                 state: 'fail',
-                username: id,
+                username: user.username,
                 ip_addr: ipAddr
             }
         });

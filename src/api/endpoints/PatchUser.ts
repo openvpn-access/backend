@@ -9,7 +9,7 @@ import {createEndpoint} from '../lib/endpoint';
 
 export const patchUser = createEndpoint({
     method: 'PATCH',
-    route: '/users/:id',
+    route: '/users/:user_id',
     middleware: bearer,
 
     validation: {
@@ -41,17 +41,17 @@ export const patchUser = createEndpoint({
         }),
 
         params: Joi.object({
-            id: Joi.number()
+            user_id: Joi.number()
         })
     },
 
     async handle(req, res) {
         const caller = req.session.user;
         const {body} = req;
-        const {id} = req.params;
+        const {user_id} = req.params;
 
         // Find user to update
-        const toPatch = await db.user.findOne({where: {id}}); // TODO: Could be NaN!!
+        const toPatch = await db.user.findOne({where: {id: user_id}});
         if (!toPatch) {
             return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
         }

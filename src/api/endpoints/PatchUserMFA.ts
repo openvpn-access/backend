@@ -7,19 +7,23 @@ import {createEndpoint} from '../lib/endpoint';
 
 export const patchUserMFA = createEndpoint({
     method: 'PATCH',
-    route: '/users/:id/mfa',
+    route: '/users/:user_id/mfa',
 
     validation: {
         body: Joi.object({
             activate: Joi.boolean(),
             code: Joi.string().length(6)
+        }),
+
+        params: Joi.object({
+            user_id: Joi.string()
         })
     },
 
     async handle(req, res) {
         const {body} = req;
         const user = await db.user.findOne({
-            where: {id: Number(req.params.id)}
+            where: {id: Number(req.params.user_id)}
         });
 
         if (!user) {

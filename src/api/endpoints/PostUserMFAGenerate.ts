@@ -9,20 +9,20 @@ import {createEndpoint} from '../lib/endpoint';
 
 export const postUserMFAGenerate = createEndpoint({
     method: 'POST',
-    route: '/users/:id/mfa/generate',
+    route: '/users/:user_id/mfa/generate',
     middleware: bearer,
 
     validation: {
         params: Joi.object({
-            id: Joi.string()
+            user_id: Joi.string()
         })
     },
 
     async handle(req, res) {
-        const {id} = req.params;
+        const {user_id} = req.params;
         const {user} = req.session;
 
-        if (user.type !== 'admin' && user.id !== id) {
+        if (user.type !== 'admin' && user.id !== user_id) {
             return res.error('Users, except for admins, can only generate mfa-tokens for themselves.', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
         }
 
@@ -32,7 +32,7 @@ export const postUserMFAGenerate = createEndpoint({
             secret = authenticator.generateSecret();
             await db.user.update({
                 data: {mfa_secret: secret},
-                where: {id}
+                where: {id: user_id}
             });
         }
 
