@@ -9,7 +9,7 @@
     "scripts": {
         "build": "tsc",
         "start": "tsc && node dist/index.js",
-        "dev": "ts-node-dev --respawn --no-notify --transpile-only src/index.ts",
+        "dev": "ts-node-dev --respawn --no-notify --cls --transpile-only src/index.ts",
         "test": "jest --runInBand",
         "test:watch": "jest --runInBand --watch",
         "lint:ts": "eslint src/**/*.{js,ts} tests/**/*.{js,ts}",

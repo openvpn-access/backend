@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {NextFunction, Request, Response, Router} from 'express';
 import {AnySchema} from 'joi';
+import {log, LogLevel} from '../../logging';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {APIError, APIResponse, respondWith, responseTools} from './tools';
@@ -24,7 +25,6 @@ export type EndpointConfig = {
     handle: Endpoint;
 };
 
-const logErrors = ['test', 'development'].includes(process.env.NODE_ENV);
 export const createEndpoint = (cfg: EndpointConfig): ((res: Router) => void) => {
 
     // Pre-process validation properties
@@ -36,9 +36,14 @@ export const createEndpoint = (cfg: EndpointConfig): ((res: Router) => void) => 
         Array.isArray(cfg.middleware) ? cfg.middleware : [cfg.middleware];
 
     return (res: Router): void => {
-        const method = cfg.method.toLocaleLowerCase();
+        const {method, route} = cfg;
 
-        res[method](
+        log('api-setup-endpoint', {
+            method, route,
+            middlewares: middlewares.length
+        }, LogLevel.DEBUG);
+
+        res[method.toLowerCase()](
             cfg.route, ...middlewares,
             (req, res) => {
 
@@ -58,12 +63,7 @@ export const createEndpoint = (cfg: EndpointConfig): ((res: Router) => void) => 
                 }
 
                 cfg.handle(req, responseTools).catch(err => {
-
-                    /* eslint-disable no-console */
-                    if (logErrors) {
-                        console.error(err);
-                    }
-
+                    log('api-endpoint-error', {reason: err}, LogLevel.ERROR);
                     return responseTools.internalError();
                 }).then(data => respondWith(res, data));
             }
