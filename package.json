@@ -9,7 +9,7 @@
     "scripts": {
         "build": "tsc",
         "start": "tsc && node dist/index.js",
-        "dev": "ts-node-dev --transpile-only src/index.ts",
+        "dev": "ts-node-dev --respawn --no-notify --transpile-only src/index.ts",
         "test": "jest --runInBand",
         "test:watch": "jest --runInBand --watch",
         "lint:ts": "eslint src/**/*.{js,ts} tests/**/*.{js,ts}",
@@ -27,6 +27,7 @@
         "@types/cors": "^2.8.6",
         "@types/express": "^4.17.7",
         "@types/jest": "^26.0.4",
+        "@types/joi": "^14.3.4",
         "@types/node": "^14.0.22",
         "@types/node-fetch": "^2.5.7",
         "@types/nodemailer": "^6.4.0",
@@ -42,7 +43,7 @@
         "node-fetch": "^2.6.0",
         "supertest": "^4.0.2",
         "ts-jest": "^26.1.1",
-        "ts-node-dev": "^1.0.0-pre.51"
+        "ts-node-dev": "^1.0.0-pre.56"
     },
     "dependencies": {
         "@prisma/client": "^2.2.2",

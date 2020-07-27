@@ -2,7 +2,7 @@ import * as prism from '@prisma/client';
 import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
-import {middleware} from '../framework';
+import {createMiddleware} from '../lib/middleware';
 
 declare module 'express-serve-static-core' {
     interface Request {
@@ -17,7 +17,7 @@ declare module 'express-serve-static-core' {
  * Authenticates a client using the baerer token.
  * If the token is valid req.session.user will be a DBUser object.
  */
-export const auth = middleware(async (req, res) => {
+export const bearer = createMiddleware(async (req, res) => {
     const {authorization} = req.headers;
     const token = authorization && authorization.slice(7);
     if (!token) {

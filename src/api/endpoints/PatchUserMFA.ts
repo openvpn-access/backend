@@ -3,38 +3,40 @@ import {authenticator} from 'otplib';
 import {db} from '../../db';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
-import {endpoint} from '../framework';
+import {createEndpoint} from '../lib/endpoint';
 
-const Payload = Joi.object({
-    activate: Joi.boolean(),
-    code: Joi.string().length(6)
-});
+export const patchUserMFA = createEndpoint({
+    method: 'PATCH',
+    route: '/users/:id/mfa',
 
-export const patchUserMFA = endpoint(async (req, res) => {
-    const {error, value} = Payload.validate(req.body);
+    validation: {
+        body: Joi.object({
+            activate: Joi.boolean(),
+            code: Joi.string().length(6)
+        })
+    },
 
-    if (error) {
-        return res.error('Invalid payload', Status.UNPROCESSABLE_ENTITY, ErrorCode.INVALID_PAYLOAD);
+    async handle(req, res) {
+        const {body} = req;
+        const user = await db.user.findOne({
+            where: {id: Number(req.params.id)}
+        });
+
+        if (!user) {
+            return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
+        } else if (!user.mfa_secret) {
+            return res.error('MFA is not set up yet.', Status.UNPROCESSABLE_ENTITY, ErrorCode.NOT_SET_UP);
+        }
+
+        if (!authenticator.check(body.code, user.mfa_secret)) {
+            return res.error('Invalid code', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
+        }
+
+        await db.user.update({
+            data: {mfa_activated: body.activate},
+            where: {id: user.id}
+        });
+
+        return res.respond();
     }
-
-    const user = await db.user.findOne({
-        where: {id: Number(req.params.id)}
-    });
-
-    if (!user) {
-        return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
-    } else if (!user.mfa_secret) {
-        return res.error('MFA is not set up yet.', Status.UNPROCESSABLE_ENTITY, ErrorCode.NOT_SET_UP);
-    }
-
-    if (!authenticator.check(value.code, user.mfa_secret)) {
-        return res.error('Invalid code', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
-    }
-
-    await db.user.update({
-        data: {mfa_activated: value.activate},
-        where: {id: user.id}
-    });
-
-    return res.respond();
 });

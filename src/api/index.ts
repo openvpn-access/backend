@@ -14,7 +14,6 @@ import {postUserMFA} from './endpoints/PostUserMFA';
 import {postUserMFAGenerate} from './endpoints/PostUserMFAGenerate';
 import {postUserPasswordResetSend} from './endpoints/PostUserPasswordResetSend';
 import {putUser} from './endpoints/PutUser';
-import {auth} from './middleware/auth';
 
 /**
  * Returns a router will all api-related endpoints bound to it.
@@ -23,21 +22,34 @@ export const api = (): Router => {
     const router = Router();
 
     // Register routes
-    router.post('/login', postLogin);
-    router.post('/logout', auth, postLogout);
-    router.get('/users', auth, getUser);
-    router.put('/users', auth, putUser);
-    router.get('/users/stats', auth, getUserStats);
-    router.patch('/users/:id', auth, patchUser); // TODO: Rename :id to :user_id
-    router.delete('/users/:id', auth, deleteUser);
-    router.patch('/users/:id/mfa', patchUserMFA);
-    router.post('/users/mfa', postUserMFA);
-    router.post('/users/:id/mfa/generate', auth, postUserMFAGenerate);
-    router.post('/users/email/verify', postUserEmailVerify);
-    router.post('/users/email/verify/send', postUserEmailVerifySend);
-    router.post('/users/password/reset', patchUserPasswordReset);
-    router.post('/users/password/reset/send', postUserPasswordResetSend);
-    router.get('/login-attempts/web', auth, getLoginAttemptWeb);
+    const routes = [
+
+        // Login / logout
+        postLogin, postLogout,
+
+        // Users
+        getUser, putUser, getUserStats,
+        patchUser, deleteUser,
+
+        // 2FA Authentication
+        patchUserMFA, postUserMFA,
+        postUserMFAGenerate,
+
+        // Email
+        postUserEmailVerify,
+        postUserEmailVerifySend,
+
+        // Password
+        patchUserPasswordReset,
+        postUserPasswordResetSend,
+
+        // Tables
+        getLoginAttemptWeb
+    ];
+
+    for (const route of routes) {
+        route(router);
+    }
 
     return router;
 };

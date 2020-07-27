@@ -1,14 +1,19 @@
 import {db} from '../../db';
-import {endpoint} from '../framework';
+import {createEndpoint} from '../lib/endpoint';
 
-export const postLogout = endpoint(async (req, res) => {
+export const postLogout = createEndpoint({
+    method: 'POST',
+    route: '/logout',
 
-    // Remove session
-    await db.web_session.delete({
-        where: {
-            token: req.session.token
-        }
-    });
+    async handle(req, res) {
 
-    return res.respond();
+        // Remove session
+        await db.web_session.delete({
+            where: {
+                token: req.session.token
+            }
+        });
+
+        return res.respond();
+    }
 });

@@ -1,7 +1,7 @@
-import {api} from './api';
+import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import bodyParser from 'body-parser';
+import {api} from './api';
 import {config} from './config';
 import {log, LogLevel} from './logging';
 
