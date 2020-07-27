@@ -16,14 +16,14 @@ export const patchUserMFA = createEndpoint({
         }),
 
         params: Joi.object({
-            user_id: Joi.string()
+            user_id: Joi.number()
         })
     },
 
     async handle(req, res) {
         const {body} = req;
         const user = await db.user.findOne({
-            where: {id: Number(req.params.user_id)}
+            where: {id: req.params.user_id}
         });
 
         if (!user) {

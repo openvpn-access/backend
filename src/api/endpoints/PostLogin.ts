@@ -13,14 +13,14 @@ export const postLogin = createEndpoint({
 
     validation: {
         body: Joi.object({
-            user_id: Joi.string(),
+            login_id: Joi.string(),
             password: Joi.string(),
             token: Joi.string()
-        }).xor('user_id', 'token').xor('password', 'token')
+        }).xor('login_id', 'token').xor('password', 'token')
     },
 
     async handle(req, res) {
-        const {user_id, password, token} = req.body;
+        const {login_id, password, token} = req.body;
 
         // Try loggin in using the token
         if (token) {
@@ -45,8 +45,8 @@ export const postLogin = createEndpoint({
         const [user] = await db.user.findMany({
             where: {
                 OR: [
-                    {username: user_id},
-                    {email: user_id}
+                    {username: login_id},
+                    {email: login_id}
                 ]
             }
         });
@@ -57,7 +57,7 @@ export const postLogin = createEndpoint({
             // Save login attempt
             await db.web_login_attempt.create({
                 data: {
-                    username: user_id,
+                    login_id,
                     ip_addr: ipAddr,
                     state: 'fail'
                 }
@@ -101,7 +101,7 @@ export const postLogin = createEndpoint({
                 data: {
                     user: {connect: {id: user.id}},
                     state: 'pass',
-                    username: user.username,
+                    login_id: user.username,
                     ip_addr: ipAddr
                 }
             });
@@ -120,7 +120,7 @@ export const postLogin = createEndpoint({
             data: {
                 user: {connect: {id: user.id}},
                 state: 'fail',
-                username: user.username,
+                login_id,
                 ip_addr: ipAddr
             }
         });

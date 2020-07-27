@@ -14,7 +14,7 @@ export const postUserMFAGenerate = createEndpoint({
 
     validation: {
         params: Joi.object({
-            user_id: Joi.string()
+            user_id: Joi.number()
         })
     },
 

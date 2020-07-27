@@ -82,7 +82,7 @@ CREATE TABLE web_login_attempt (
 
     # State, tried username and ip address
     state enum ('pass', 'fail') NOT NULL,
-    username tinytext NOT NULL,
+    login_id tinytext NOT NULL,
     ip_addr tinytext NOT NULL,
 
     # Constraints

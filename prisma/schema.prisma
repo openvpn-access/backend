@@ -73,8 +73,8 @@ model web_login_attempt {
   created_at DateTime                @default(now())
   id         Int                     @default(autoincrement()) @id
   ip_addr    String
+  login_id   String
   state      web_login_attempt_state
-  username   String
   user_id    Int?
   user       user?                   @relation(fields: [user_id], references: [id])
 
