@@ -82,10 +82,17 @@ export const patchUser = createEndpoint({
         // pre-process password
         if (body.password) {
             body.password = await hash(body.password, config.security.saltRounds);
+
+            // Invalidate other sessions
+            await db.web_session.deleteMany({
+                where: {
+                    user_id: toPatch.id,
+                    NOT: {token: req.session.token}
+                }
+            });
         }
 
         // Update user in db
-        // TODO: Invalidate all sessions?
         return db.user.update({
             select: config.db.exposed.user,
             data: {

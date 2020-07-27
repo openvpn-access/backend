@@ -35,9 +35,7 @@ export const patchUserPasswordReset = createEndpoint({
         }
 
         // Update password
-        // TODO: Invalidate all sessions?
-        await db.user.update({
-            select: config.db.exposed.user,
+        const user = await db.user.update({
             data: {password: await hash(body.new_password, config.security.saltRounds)},
             where: {id: token.user_id}
         });
@@ -48,6 +46,11 @@ export const patchUserPasswordReset = createEndpoint({
                 user_id: token.user_id,
                 type: 'reset_password'
             }
+        });
+
+        // Invalidate all sessions
+        await db.web_session.deleteMany({
+            where: {user_id: user.id}
         });
 
         return res.respond();
