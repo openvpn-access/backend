@@ -8,7 +8,7 @@ import {Status} from '../enums/Status';
 import {endpoint} from '../framework';
 
 const Payload = Joi.object({
-    id: Joi.string(),
+    id: Joi.string(), // TODO: Change to login_id
     password: Joi.string(),
     token: Joi.string()
 }).xor('id', 'token').xor('password', 'token');

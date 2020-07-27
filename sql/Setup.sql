@@ -27,6 +27,10 @@ CREATE TABLE user (
     username tinytext NOT NULL UNIQUE,
     password tinytext NOT NULL,
 
+    # Multifactor authentication
+    mfa_activated bool DEFAULT false,
+    mfa_secret varchar(128) DEFAULT NULL,
+
     # It's possible to limit the user in a way he can only user a certain amount of
     # bytes in a specific time period.
     transfer_limit_period int UNSIGNED DEFAULT null, # Period in seconds
@@ -52,15 +56,16 @@ CREATE TABLE user (
 # This table contains a list of tokens used to verify an email or reset a password.
 #DROP TABLE IF EXISTS user_access_token;
 CREATE TABLE user_access_token (
+    id int NOT NULL AUTO_INCREMENT,
     user_id int NOT NULL,
     created_at datetime NOT NULL DEFAULT NOW(),
-    type enum ('verify-email', 'reset-password') NOT NULL
+    type enum ('verify-email', 'reset-password') NOT NULL,
     
     # Verification token
     token tinytext NOT NULL UNIQUE,
 
     # Constraints
-    PRIMARY KEY (token),
+    PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE = INNODB,
   AUTO_INCREMENT = 1,

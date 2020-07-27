@@ -43,7 +43,7 @@ export const patchUser = endpoint(async (req, res) => {
     const {id} = req.params;
 
     // Find user to update
-    const toPatch = await db.user.findOne({where: {id: Number(id)}});
+    const toPatch = await db.user.findOne({where: {id: Number(id)}}); // TODO: Could be NaN!!
     if (!toPatch) {
         return res.error('User not found', Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }

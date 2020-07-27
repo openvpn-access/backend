@@ -13,6 +13,8 @@ model user {
   email                 String              @unique
   email_verified        Boolean?            @default(false)
   id                    Int                 @default(autoincrement()) @id
+  mfa_activated         Boolean?            @default(false)
+  mfa_secret            String?
   ovpn_ca               String?
   ovpn_cert             String?
   ovpn_key              String?
