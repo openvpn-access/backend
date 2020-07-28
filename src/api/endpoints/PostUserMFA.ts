@@ -10,18 +10,18 @@ export const postUserMFA = createEndpoint({
 
     validation: {
         body: Joi.object({
-            id: Joi.string()
+            login_id: Joi.string()
         })
     },
 
     async handle(req, res) {
-        const {body} = req;
+        const {login_id} = req.body;
 
         const [user] = await db.user.findMany({
             where: {
                 OR: [
-                    {username: body.id},
-                    {email: body.id}
+                    {username: login_id},
+                    {email: login_id}
                 ]
             }
         });

@@ -9,6 +9,7 @@ export enum ErrorCode {
     INVALID_TOKEN = 1,
     INVALID_PAYLOAD = 2,
     INVALID_PASSWORD = 3,
+    INVALID_MFA_CODE = 14,
 
     DUPLICATE_USERNAME = 4,
     DUPLICATE_EMAIL = 5,
