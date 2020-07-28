@@ -37,7 +37,7 @@
                 "user_id": true,
                 "created_at": true,
                 "state": true,
-                "username": true,
+                "login_id": true,
                 "ip_addr": true
             }
         }

@@ -26,14 +26,14 @@ export const getLoginAttemptWeb = createEndpoint({
                 .default(60),
 
             sort: Joi.string()
-                .valid('id', 'user_id', 'created_at', 'state', 'ip_addr', 'username')
+                .valid('id', 'user_id', 'created_at', 'state', 'ip_addr', 'login_id')
                 .default('id'),
 
             sort_dir: Joi.string()
                 .valid('asc', 'desc')
                 .default('desc'),
 
-            username: Joi.string(),
+            login_id: Joi.string(),
             ip_addr: Joi.string(),
             user_id: Joi.number(),
 
