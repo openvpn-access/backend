@@ -33,7 +33,7 @@ type Config = {
 
     security: {
         saltRounds: number;
-        apiKeySize: number; // TODO: Rename to token and make sessions expire
+        tokenSize: number;
         loginAttempts: number;
         loginAttemptsTimeRange: number;
     };

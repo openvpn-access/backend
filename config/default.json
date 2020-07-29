@@ -27,6 +27,7 @@
                 "email": true,
                 "email_verified": true,
                 "username": true,
+                "mfa_activated": true,
                 "transfer_limit_period": true,
                 "transfer_limit_start": true,
                 "transfer_limit_end": true,
@@ -44,7 +45,7 @@
     },
     "security": {
         "saltRounds": 10,
-        "apiKeySize": 64,
+        "tokenSize": 64,
         "loginAttempts": 5,
         "loginAttemptsTimeRange": 3600
     },

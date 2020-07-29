@@ -118,7 +118,7 @@ export const postLogin = createEndpoint({
             }
 
             // Create session key and add session
-            const token = await secureUid(config.security.apiKeySize);
+            const token = await secureUid(config.security.tokenSize);
             await db.web_session.create({
                 data: {
                     user: {connect: {id: user.id}},

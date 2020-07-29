@@ -35,7 +35,7 @@ export const postUserEmailVerifySend = createEndpoint({
                 data: {
                     type: 'verify_email',
                     user: {connect: {id: user.id}},
-                    token: await secureUid(config.security.apiKeySize)
+                    token: await secureUid(config.security.tokenSize)
                 }
             });
 

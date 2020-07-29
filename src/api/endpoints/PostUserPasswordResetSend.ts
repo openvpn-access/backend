@@ -35,7 +35,7 @@ export const postUserPasswordResetSend = createEndpoint({
                 data: {
                     type: 'reset_password',
                     user: {connect: {id: user.id}},
-                    token: await secureUid(config.security.apiKeySize)
+                    token: await secureUid(config.security.tokenSize)
                 }
             });
 
