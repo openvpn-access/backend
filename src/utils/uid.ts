@@ -1,5 +1,6 @@
 import {randomBytes} from 'crypto';
 import {promisify} from 'util';
+import {log, LogLevel} from '../logging';
 
 const randomBytesAsync = promisify(randomBytes);
 
@@ -21,11 +22,12 @@ export const secureUid = async (length: number): Promise<string> => {
 
     let str = '';
     while (str.length < length) {
-        const next = await randomBytesAsync((length * 1.5) >>> 0);
+        const [error, next] = await randomBytesAsync((length * 1.5) >>> 0)
+            .then(value => [false, value])
+            .catch(error => [true, error]);
 
-        if (next === undefined) {
-
-            // TODO: Log?
+        if (error) {
+            log('failed-rand', {reason: next}, LogLevel.ERROR);
             return uid(length);
         }
 
