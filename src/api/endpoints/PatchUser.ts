@@ -2,6 +2,7 @@ import {compare, hash} from 'bcrypt';
 import Joi from 'joi';
 import {config} from '../../config';
 import {db} from '../../db';
+import {resolveDBError} from '../../db/resolve-error';
 import {bearer} from '../auth/bearer';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
@@ -106,16 +107,9 @@ export const patchUser = createEndpoint({
         }).then(data => {
             return res.respond(data);
         }).catch(e => {
-
-            // TODO: This code is a duplicate as seen in PutUser, abstract that somehow
-            if (e.code === 'P2002') {
-                const field = e.code.meta.target;
-
-                if (field === 'username') {
-                    return res.error('This username is already in use.', Status.CONFLICT, ErrorCode.DUPLICATE_USERNAME);
-                } else if (field === 'email') {
-                    return res.error('This email is already in use.', Status.CONFLICT, ErrorCode.DUPLICATE_EMAIL);
-                }
+            const resolved = resolveDBError(e);
+            if (resolved) {
+                return res.error(...resolved);
             }
 
             throw e;
