@@ -10,17 +10,17 @@ beforeAll(async () => {
 
     // Login using the admin account
     await request(app)
-        .post('/api/login')
-        .send({id: 'admin', password: 'password'})
+        .post('/api/v1/login')
+        .send({login_id: 'admin', password: 'password'})
         .expect(Status.OK)
         .then(res => token = res.body.token);
 });
 
 afterAll(async () => {
 
-    // Clean up user
-    await db.user.delete({
-        where: {username: 'mori.noma'}
+    // Clean up dangling users
+    await db.user.deleteMany({
+        where: {username: {in: ['mori.noma']}}
     });
 });
 
@@ -38,7 +38,7 @@ describe('PATCH /api/users', () => {
         });
 
         return request(app)
-            .patch(`/api/users/${user.id}`)
+            .patch(`/api/v1/users/${user.id}`)
             .set('Authorization', `Baerer ${token}`)
             .send({
                 'username': 'mori.noma',
@@ -50,7 +50,6 @@ describe('PATCH /api/users', () => {
                 expect(res.body.username).toEqual('mori.noma');
                 expect(res.body.email).toEqual('noa@muxa.com');
                 expect(res.body.type).toEqual('admin');
-                expect(res.body.state).toEqual('deactivated');
             });
     });
 });

@@ -26,7 +26,7 @@ export const postUserPasswordResetSend = createEndpoint({
             where: {email: body.email}
         });
 
-        // TODO: This is an attach-vector: It takes way longer if the email is valid!
+        // TODO: This is an attack-vector: It takes way longer if the email is valid / in use.
         // Send password-reset email
         if (user) {
 

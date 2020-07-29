@@ -12,8 +12,8 @@ beforeAll(async () => {
 
     // Login using the admin account
     await request(app)
-        .post('/api/login')
-        .send({id: 'admin', password: 'password'})
+        .post('/api/v1/login')
+        .send({login_id: 'admin', password: 'password'})
         .expect(Status.OK)
         .then(res => token = res.body.token);
 });
@@ -29,7 +29,7 @@ afterAll(async () => {
 describe('PUT /api/users', () => {
     it('Should add a new user', async () => {
         return request(app)
-            .put('/api/users')
+            .put('/api/v1/users')
             .set('Authorization', `Baerer ${token}`)
             .send({
                 'username': 'foobar',
@@ -42,7 +42,7 @@ describe('PUT /api/users', () => {
 
     it('Should return a conflict if the username is already in use', async () => {
         return request(app)
-            .put('/api/users')
+            .put('/api/v1/users')
             .set('Authorization', `Baerer ${token}`)
             .send({
                 'username': 'foobar',
@@ -56,7 +56,7 @@ describe('PUT /api/users', () => {
 
     it('Should return a conflict if the email is already in use', async () => {
         return request(app)
-            .put('/api/users')
+            .put('/api/v1/users')
             .set('Authorization', `Baerer ${token}`)
             .send({
                 'username': 'foobasr',

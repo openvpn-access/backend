@@ -29,7 +29,6 @@ export const patchUserPasswordReset = createEndpoint({
             where: {token: body.token}
         });
 
-        // TODO: Manually checking the type might not be the best solution?!
         if (!token || token.type !== 'reset_password') {
             return res.error('Invalid password reset token', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
         }

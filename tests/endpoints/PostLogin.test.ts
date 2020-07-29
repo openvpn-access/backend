@@ -11,7 +11,7 @@ import {errorCode} from '../utils/error';
 const resetLoginAttempts = async () => await db.web_login_attempt.deleteMany({
     where: {
         state: 'fail',
-        username: 'admin'
+        login_id: 'admin'
     }
 });
 
@@ -22,16 +22,16 @@ afterAll(resetLoginAttempts);
 describe('POST /api/login', () => {
     it('Should return an error if the payload is invalid', async () => {
         return request(app)
-            .post('/api/login')
+            .post('/api/v1/login')
             .send({})
-            .expect(Status.UNPROCESSABLE_ENTITY)
+            .expect(Status.BAD_REQUEST)
             .expect(errorCode(ErrorCode.INVALID_PAYLOAD));
     });
 
     it('Should login the administrator using username and password', async () => {
         return request(app)
-            .post('/api/login')
-            .send({id: 'admin', password: 'password'})
+            .post('/api/v1/login')
+            .send({login_id: 'admin', password: 'password'})
             .expect(Status.OK)
             .then(res => {
                 expect(res.body.token).toBeString();
@@ -41,8 +41,8 @@ describe('POST /api/login', () => {
 
     it('Should login the administrator using username and email', async () => {
         return request(app)
-            .post('/api/login')
-            .send({id: 'admin@vpnaccess.com', password: 'password'})
+            .post('/api/v1/login')
+            .send({login_id: 'admin@vpnaccess.com', password: 'password'})
             .expect(Status.OK)
             .then(res => {
                 expect(res.body.token).toBeString();
@@ -52,16 +52,16 @@ describe('POST /api/login', () => {
 
     it('Should respond properly if the user does not exist', async () => {
         return request(app)
-            .post('/api/login')
-            .send({id: 'hello', password: 'password'})
+            .post('/api/v1/login')
+            .send({login_id: 'hello', password: 'password'})
             .expect(Status.NOT_FOUND)
             .expect(errorCode(ErrorCode.USER_NOT_FOUND));
     });
 
     it('Should respond properly if the password is invalid', async () => {
         return request(app)
-            .post('/api/login')
-            .send({id: 'admin', password: 'admin'})
+            .post('/api/v1/login')
+            .send({login_id: 'admin', password: 'admin'})
             .expect(Status.UNAUTHORIZED)
             .expect(errorCode(ErrorCode.INVALID_PASSWORD));
     });
@@ -70,15 +70,15 @@ describe('POST /api/login', () => {
     it(`Should lock the account after ${loginAttempts} failed login attempts (${loginAttempts - 1} left)`, async () => {
         for (let i = 0; i < loginAttempts - 1; i++) {
             await request(app)
-                .post('/api/login')
-                .send({id: 'admin', password: 'admin'})
+                .post('/api/v1/login')
+                .send({login_id: 'admin', password: 'admin'})
                 .expect(Status.UNAUTHORIZED)
                 .expect(errorCode(ErrorCode.INVALID_PASSWORD));
         }
 
         await request(app)
-            .post('/api/login')
-            .send({id: 'admin', password: 'admin'})
+            .post('/api/v1/login')
+            .send({login_id: 'admin', password: 'admin'})
             .expect(Status.LOCKED)
             .expect(errorCode(ErrorCode.LOCKED_ACCOUNT));
     });

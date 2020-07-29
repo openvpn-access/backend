@@ -9,8 +9,8 @@ beforeAll(async () => {
 
     // Login using the admin account
     await request(app)
-        .post('/api/login')
-        .send({id: 'admin', password: 'password'})
+        .post('/api/v1/login')
+        .send({login_id: 'admin', password: 'password'})
         .expect(Status.OK)
         .then(res => token = res.body.token);
 });
@@ -18,7 +18,7 @@ beforeAll(async () => {
 describe('GET /api/users/stats', () => {
     it('Should return the amount of users', async () => {
         return request(app)
-            .get('/api/users/stats')
+            .get('/api/v1/users/stats')
             .set('Authorization', `Baerer ${token}`)
             .expect(Status.OK)
             .expect(res => {

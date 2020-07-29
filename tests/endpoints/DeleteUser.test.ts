@@ -10,10 +10,15 @@ beforeAll(async () => {
 
     // Login using the admin account
     await request(app)
-        .post('/api/login')
-        .send({id: 'admin', password: 'password'})
+        .post('/api/v1/login')
+        .send({login_id: 'admin', password: 'password'})
         .expect(Status.OK)
         .then(res => token = res.body.token);
+
+    // Remove dangling users
+    await db.user.deleteMany({
+        where: {username: {in: ['deleteme']}}
+    });
 });
 
 describe('DELETE /api/users', () => {
@@ -30,7 +35,7 @@ describe('DELETE /api/users', () => {
         });
 
         return request(app)
-            .delete(`/api/users/${user.id}`)
+            .delete(`/api/v1/users/${user.id}`)
             .set('Authorization', `Baerer ${token}`)
             .expect(Status.OK);
     });
