@@ -22,7 +22,7 @@ export const putUser = createEndpoint({
             activated: Joi.boolean(),
 
             email: Joi.string()
-                .email()
+                .email({tlds: false, minDomainSegments: 1})
                 .required(),
 
             username: Joi.string()

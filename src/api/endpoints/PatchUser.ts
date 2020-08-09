@@ -21,7 +21,7 @@ export const patchUser = createEndpoint({
             activated: Joi.boolean(),
 
             email: Joi.string()
-                .email(),
+                .email({tlds: false, minDomainSegments: 1}),
 
             username: Joi.string()
                 .min(3)
