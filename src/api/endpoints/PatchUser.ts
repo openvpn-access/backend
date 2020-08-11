@@ -19,6 +19,7 @@ export const patchUser = createEndpoint({
                 .valid('user', 'admin'),
 
             activated: Joi.boolean(),
+            mfa_activated: Joi.boolean(),
 
             email: Joi.string()
                 .email({tlds: false, minDomainSegments: 1}),
@@ -77,6 +78,11 @@ export const patchUser = createEndpoint({
             return res.error('Invalid password', Status.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);
         }
 
+        // MFA Can only get deactivated
+        if (caller.type === 'admin' && body.mfa_activated && !toPatch.mfa_activated) {
+            return res.error('MFA Can only be activated by the user.', Status.UNAUTHORIZED, ErrorCode.MFA_INVALID_ACTION);
+        }
+
         // Not part of the user-table
         delete body.current_password;
 
@@ -97,7 +103,6 @@ export const patchUser = createEndpoint({
         return db.user.update({
             select: config.db.exposed.user,
             data: {
-                ...toPatch,
                 ...body,
                 ...(body.email && body.email !== toPatch.email && {
                     email_verified: false
