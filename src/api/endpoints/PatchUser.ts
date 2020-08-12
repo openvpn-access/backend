@@ -34,10 +34,13 @@ export const patchUser = createEndpoint({
                 .max(50)
                 .regex(/^[^\s]+$/),
 
-            transfer_limit_period: Joi.alternatives(Joi.number(), null),
-            transfer_limit_start: Joi.alternatives(Joi.date(), null),
-            transfer_limit_end: Joi.alternatives(Joi.date(), null),
-            transfer_limit_bytes: Joi.alternatives(Joi.number(), null),
+            transfer_limit_period: Joi.alternatives(Joi.number().positive(), null),
+            transfer_limit_bytes: Joi.alternatives(Joi.number().positive(), null),
+            transfer_limit_start: Joi.alternatives(Joi.date().iso(), null),
+            transfer_limit_end: Joi.alternatives(
+                Joi.date().iso().greater(Joi.ref('transfer_limit_start')),
+                null
+            ).default(null),
 
             current_password: Joi.string()
         }),

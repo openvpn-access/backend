@@ -37,10 +37,13 @@ export const putUser = createEndpoint({
                 .regex(/^[^\s]+$/)
                 .required(),
 
-            transfer_limit_period: Joi.alternatives(Joi.number(), null).default(null),
-            transfer_limit_start: Joi.alternatives(Joi.date(), null).default(null),
-            transfer_limit_end: Joi.alternatives(Joi.date(), null).default(null),
-            transfer_limit_bytes: Joi.alternatives(Joi.number(), null).default(null)
+            transfer_limit_period: Joi.alternatives(Joi.number().positive(), null),
+            transfer_limit_bytes: Joi.alternatives(Joi.number().positive(), null),
+            transfer_limit_start: Joi.alternatives(Joi.date().iso(), null),
+            transfer_limit_end: Joi.alternatives(
+                Joi.date().iso().greater(Joi.ref('transfer_limit_start')),
+                null
+            ).default(null)
         })
     },
 
