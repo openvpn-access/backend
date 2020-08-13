@@ -24,6 +24,8 @@ afterAll(async () => {
     await db.user.delete({
         where: {username: 'foobar'}
     });
+
+    await db.$disconnect();
 });
 
 describe('PUT /api/users', () => {

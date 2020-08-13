@@ -2,9 +2,11 @@ import 'jest-extended';
 import request from 'supertest';
 import {app} from '../../src';
 import {Status} from '../../src/api/enums/Status';
+import {db} from '../../src/db';
 
 let token: string | null = null;
 
+afterAll(() => db.$disconnect());
 beforeAll(async () => {
 
     // Login using the admin account

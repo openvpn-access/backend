@@ -6,6 +6,7 @@ import {db} from '../../src/db';
 
 let token: string | null = null;
 
+afterAll(() => db.$disconnect());
 beforeAll(async () => {
 
     // Login using the admin account

@@ -22,6 +22,8 @@ afterAll(async () => {
     await db.user.deleteMany({
         where: {username: {in: ['mori.noma']}}
     });
+
+    db.$disconnect();
 });
 
 describe('PATCH /api/users', () => {

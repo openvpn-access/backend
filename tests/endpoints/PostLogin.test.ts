@@ -17,7 +17,10 @@ const resetLoginAttempts = async () => await db.web_login_attempt.deleteMany({
 
 // Reset login attempts before and after all tests
 beforeAll(resetLoginAttempts);
-afterAll(resetLoginAttempts);
+afterAll(async () => {
+    await resetLoginAttempts();
+    await db.$disconnect();
+});
 
 describe('POST /api/login', () => {
     it('Should return an error if the payload is invalid', async () => {
