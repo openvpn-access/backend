@@ -34,5 +34,14 @@ fi
 
 echo "Starting the backend..."
 
+if [[ -d /config ]]; then
+    if [[ -f /config/backend.json ]]; then
+        cp /config/backend.json /opt/app/dist/config/production.json
+    else
+        cp /opt/app/config/production.json /config/backend.json
+    fi
+fi
+
 cd /opt/app
+export NODE_ENV=production 
 node ./dist/src/index.js
