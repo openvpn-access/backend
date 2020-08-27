@@ -1,10 +1,10 @@
+import {config} from '../../config';
+
 type Props = {
     username: string;
     host: string;
     link: string;
 }
-
-// TODO: Currently github is abused and used as CDN for the logo, fix that (how?)
 
 export const resetPasswordTemplate = (props: Props): string => `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -172,7 +172,7 @@ export const resetPasswordTemplate = (props: Props): string => `
                                              alt="Alternate text"
                                              border="0"
                                              class="center fixedwidth"
-                                             src="https://user-images.githubusercontent.com/30767528/88220103-d758be00-cc62-11ea-9dd7-f1fedc478d3a.png"
+                                             src="${config.server.host}/static/assets/email/header-logo.png"
                                              style="text-decoration: none; -ms-interpolation-mode: bicubic; height: auto; border: 0; width: 100%; max-width: 125px; display: block;"
                                              title="Alternate text"
                                              width="125"/>

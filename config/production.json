@@ -1,4 +1,8 @@
 {
+    "server": {
+        "host": "<public-host>",
+        "port": null
+    },
     "logs": {
         "logLevels": [
             "FATAL",
