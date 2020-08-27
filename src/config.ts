@@ -6,7 +6,7 @@ import testConfig from '../config/test.json';
 
 type Config = {
     server: {
-        port: number;
+        port: number | null;
         host: string;
         apiEndpoint: string;
     };

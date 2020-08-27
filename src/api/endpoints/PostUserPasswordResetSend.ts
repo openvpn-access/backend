@@ -40,8 +40,9 @@ export const postUserPasswordResetSend = createEndpoint({
             });
 
             // TODO: Use some sort of appname or just plain OpenVPN Access?
-            const host = config.server.host + (isDev ? ':3000' : '');
-            const link = `${isDev ? 'http' : 'https'}://${host}/reset-password?user=${user.id}&token=${token.token}`;
+            const {host, port} = config.server;
+            const base = host + (port ? `:${config.server.port}` : '');
+            const link = `${isDev ? 'http' : 'https'}://${base}/reset-password?user=${user.id}&token=${token.token}`;
 
             // Send email
             return sendMail({
