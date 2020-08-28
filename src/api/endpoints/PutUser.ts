@@ -3,11 +3,14 @@ import Joi from 'joi';
 import {config} from '../../config';
 import {db} from '../../db';
 import {resolveDBError} from '../../db/resolve-error';
+import {emailTemplates, sendMail} from '../../mail';
+import {secureUid} from '../../utils/uid';
 import {bearer} from '../auth/bearer';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {createEndpoint} from '../lib/endpoint';
 
+const isDev = process.env.NODE_ENV === 'development';
 export const putUser = createEndpoint({
     method: 'PUT',
     route: '/users',
@@ -63,7 +66,32 @@ export const putUser = createEndpoint({
         return db.user.create({
             select: config.db.exposed.user,
             data: body
-        }).then(data => {
+        }).then(async data => {
+
+            // Send verification email
+            // Create verification token
+            const token = await db.user_access_token.create({
+                data: {
+                    type: 'verify_email',
+                    user: {connect: {id: (data as {id: number}).id}},
+                    token: await secureUid(config.security.tokenSize)
+                }
+            });
+
+            const {host, port} = config.server;
+            const base = host + (port ? `:${config.server.port}` : '');
+            const link = `${isDev ? 'http' : 'https'}://${base}/verify-email?email=${body.email}&token=${token.token}`;
+
+            // Send email
+            sendMail({
+                to: body.email,
+                subject: 'Please verify your openvpn-access email address',
+                html: emailTemplates.verifyEmail({
+                    host, link,
+                    username: body.username
+                })
+            }).catch(() => null);
+
             return res.respond(data);
         }).catch(e => {
             const resolved = resolveDBError(e);
