@@ -1,6 +1,7 @@
 import {hash} from 'bcrypt';
 import Joi from 'joi';
 import {config} from '../../config';
+import {baseUrl, baseUrlHost} from '../../constants';
 import {db} from '../../db';
 import {resolveDBError} from '../../db/resolve-error';
 import {emailTemplates, sendMail} from '../../mail';
@@ -10,7 +11,6 @@ import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {createEndpoint} from '../lib/endpoint';
 
-const isDev = process.env.NODE_ENV === 'development';
 export const putUser = createEndpoint({
     method: 'PUT',
     route: '/users',
@@ -78,16 +78,13 @@ export const putUser = createEndpoint({
                 }
             });
 
-            const {host, port} = config.server;
-            const base = host + (port ? `:${config.server.port}` : '');
-            const link = `${isDev ? 'http' : 'https'}://${base}/verify-email?email=${body.email}&token=${token.token}`;
-
             // Send email
             sendMail({
                 to: body.email,
                 subject: 'Please verify your openvpn-access email address',
                 html: emailTemplates.verifyEmail({
-                    host, link,
+                    host: baseUrlHost,
+                    link: `${baseUrl}/verify-email?email=${body.email}&token=${token.token}`,
                     username: body.username
                 })
             }).catch(() => null);

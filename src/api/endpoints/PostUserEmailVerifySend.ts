@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import {config} from '../../config';
+import {baseUrl, baseUrlHost} from '../../constants';
 import {db} from '../../db';
 import {emailTemplates, sendMail} from '../../mail';
 import {secureUid} from '../../utils/uid';
@@ -7,8 +8,6 @@ import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {createEndpoint} from '../lib/endpoint';
 
-
-const isDev = process.env.NODE_ENV === 'development';
 export const postUserEmailVerifySend = createEndpoint({
     method: 'POST',
     route: '/users/email/verify/send',
@@ -39,16 +38,13 @@ export const postUserEmailVerifySend = createEndpoint({
                 }
             });
 
-            const {host, port} = config.server;
-            const base = host + (port ? `:${config.server.port}` : '');
-            const link = `${isDev ? 'http' : 'https'}://${base}/verify-email?email=${body.email}&token=${token.token}`;
-
             // Send email
             return sendMail({
                 to: user.email,
                 subject: 'Please verify your openvpn-access email address',
                 html: emailTemplates.verifyEmail({
-                    host, link,
+                    host: baseUrlHost,
+                    link: `${baseUrl}/verify-email?email=${body.email}&token=${token.token}`,
                     username: user.username
                 })
             }).then(() => {
