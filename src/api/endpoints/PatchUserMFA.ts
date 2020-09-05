@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import {authenticator} from 'otplib';
 import {db} from '../../db';
+import {secureBackupCodes} from '../../utils/uid';
 import {ErrorCode} from '../enums/ErrorCode';
 import {Status} from '../enums/Status';
 import {createEndpoint} from '../lib/endpoint';
@@ -36,11 +37,22 @@ export const patchUserMFA = createEndpoint({
             return res.error('Invalid code', Status.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
         }
 
+        // Generate backup codes
+        const backupCodes = await secureBackupCodes(10)
+            .catch(() => null);
+
+        if (!backupCodes) {
+            return res.internalError();
+        }
+
         await db.user.update({
-            data: {mfa_activated: body.activate},
+            data: {
+                mfa_activated: body.activate,
+                mfa_backup_codes: body.activate ? backupCodes.join('') : null
+            },
             where: {id: user.id}
         });
 
-        return res.respond();
+        return res.respond({backupCodes});
     }
 });

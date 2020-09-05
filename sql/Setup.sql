@@ -30,6 +30,7 @@ CREATE TABLE user (
     # Multifactor authentication
     mfa_activated bool DEFAULT false,
     mfa_secret varchar(128) DEFAULT NULL,
+    mfa_backup_codes varchar(80) DEFAULT NULL,
 
     # It's possible to limit the user in a way he can only user a certain amount of
     # bytes in a specific time period.
@@ -60,7 +61,7 @@ CREATE TABLE user_access_token (
     user_id int NOT NULL,
     created_at datetime NOT NULL DEFAULT NOW(),
     type enum ('verify-email', 'reset-password') NOT NULL,
-    
+
     # Verification token
     token tinytext NOT NULL UNIQUE,
 

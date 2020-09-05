@@ -4,6 +4,10 @@ import {log, LogLevel} from '../logging';
 
 const randomBytesAsync = promisify(randomBytes);
 
+/**
+ * Generates an insecure uid using Math.random
+ * @param length
+ */
 export const uid = (length: number): string => {
     let str = Date.now().toString(32);
 
@@ -15,6 +19,12 @@ export const uid = (length: number): string => {
     return str;
 };
 
+/**
+ * Generates a secure number with the length provided.
+ * In case the crypto module fails the insecure function is used as fallback and it gets logged as error.
+ *
+ * @param length
+ */
 export const secureUid = async (length: number): Promise<string> => {
     if (length < 8) {
         throw new Error('Minimum length for an uid is 8.');
@@ -37,4 +47,14 @@ export const secureUid = async (length: number): Promise<string> => {
     }
 
     return str.substr(0, length);
+};
+
+/**
+ * Generates 8-digit numbers which can be used as backup codes.
+ *
+ * @param amount
+ */
+export const secureBackupCodes = async (amount = 10): Promise<Array<string>> => {
+    return randomBytesAsync(amount)
+        .then(randomBytes => [...randomBytes].map(v => String(Math.ceil(99999999 * v / 255)).padStart(8, '0')));
 };

@@ -8,25 +8,26 @@ datasource db {
 }
 
 model user {
-  activated             Boolean?            @default(true)
+  id                    Int                 @default(autoincrement()) @id
   created_at            DateTime            @default(now())
+  updated_at            DateTime            @default(now())
+  type                  user_type
+  activated             Boolean?            @default(true)
   email                 String              @unique
   email_verified        Boolean?            @default(false)
-  id                    Int                 @default(autoincrement()) @id
+  username              String              @unique
+  password              String
   mfa_activated         Boolean?            @default(false)
   mfa_secret            String?
+  mfa_backup_codes      String?
+  transfer_limit_period Int?
+  transfer_limit_start  DateTime?
+  transfer_limit_end    DateTime?
+  transfer_limit_bytes  Int?
   ovpn_ca               String?
   ovpn_cert             String?
   ovpn_key              String?
   ovpn_tls_crypt        String?
-  password              String
-  transfer_limit_bytes  Int?
-  transfer_limit_end    DateTime?
-  transfer_limit_period Int?
-  transfer_limit_start  DateTime?
-  type                  user_type
-  updated_at            DateTime            @default(now())
-  username              String              @unique
   user_access_token     user_access_token[]
   vpn_login_attempt     vpn_login_attempt[]
   vpn_session           vpn_session[]
@@ -35,58 +36,58 @@ model user {
 }
 
 model user_access_token {
-  created_at DateTime               @default(now())
   id         Int                    @default(autoincrement()) @id
-  token      String                 @unique
-  type       user_access_token_type
   user_id    Int
+  created_at DateTime               @default(now())
+  type       user_access_token_type
+  token      String                 @unique
   user       user                   @relation(fields: [user_id], references: [id])
 
   @@index([user_id], name: "user_id")
 }
 
 model vpn_login_attempt {
-  created_at DateTime                @default(now())
   id         Int                     @default(autoincrement()) @id
-  ip_addr    String
+  user_id    Int?
+  created_at DateTime                @default(now())
   state      vpn_login_attempt_state
   username   String
-  user_id    Int?
+  ip_addr    String
   user       user?                   @relation(fields: [user_id], references: [id])
 
   @@index([user_id], name: "user_id")
 }
 
 model vpn_session {
-  closed_at   DateTime?
-  created_at  DateTime  @default(now())
   id          Int       @default(autoincrement()) @id
-  ip_addr     String
-  transferred Int       @default(0)
   user_id     Int
+  ip_addr     String
+  created_at  DateTime  @default(now())
+  closed_at   DateTime?
+  transferred Int       @default(0)
   user        user      @relation(fields: [user_id], references: [id])
 
   @@index([user_id], name: "user_id")
 }
 
 model web_login_attempt {
-  created_at DateTime                @default(now())
   id         Int                     @default(autoincrement()) @id
-  ip_addr    String
-  login_id   String
-  state      web_login_attempt_state
   user_id    Int?
+  created_at DateTime                @default(now())
+  state      web_login_attempt_state
+  login_id   String
+  ip_addr    String
   user       user?                   @relation(fields: [user_id], references: [id])
 
   @@index([user_id], name: "user_id")
 }
 
 model web_session {
-  created_at DateTime @default(now())
   id         Int      @default(autoincrement()) @id
-  ip_addr    String
-  token      String   @unique
   user_id    Int
+  ip_addr    String
+  created_at DateTime @default(now())
+  token      String   @unique
   user       user     @relation(fields: [user_id], references: [id])
 
   @@index([user_id], name: "user_id")
