@@ -38,21 +38,21 @@ export const patchUserMFA = createEndpoint({
         }
 
         // Generate backup codes
-        const backupCodes = await secureBackupCodes(10)
+        const backup_codes = await secureBackupCodes(10)
             .catch(() => null);
 
-        if (!backupCodes) {
+        if (!backup_codes) {
             return res.internalError();
         }
 
         await db.user.update({
             data: {
                 mfa_activated: body.activate,
-                mfa_backup_codes: body.activate ? backupCodes.join('') : null
+                mfa_backup_codes: body.activate ? backup_codes.join('') : null
             },
             where: {id: user.id}
         });
 
-        return res.respond({backupCodes});
+        return res.respond({backup_codes});
     }
 });
