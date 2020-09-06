@@ -17,12 +17,13 @@ export const postLogin = createEndpoint({
             login_id: Joi.string(),
             password: Joi.string(),
             token: Joi.string(),
-            mfa_code: Joi.string()
+            mfa_code: Joi.string(),
+            backup_code: Joi.string()
         }).xor('login_id', 'token').xor('password', 'token')
     },
 
     async handle(req, res) {
-        const {login_id, password, token, mfa_code} = req.body;
+        const {login_id, password, token, mfa_code, backup_code} = req.body;
 
         // Try loggin in using the token
         if (token) {
@@ -99,23 +100,52 @@ export const postLogin = createEndpoint({
         if (await bcrypt.compare(password, user.password)) {
 
             // Check MFA token (if set)
-            if (user.mfa_activated && (
-                !mfa_code ||
-                !authenticator.check(mfa_code, user.mfa_secret as string)
-            )) {
+            if (user.mfa_activated) {
 
-                // Save login attempt
-                await db.web_login_attempt.create({
-                    data: {
-                        user: {connect: {id: user.id}},
-                        login_id,
-                        ip_addr: ipAddr,
-                        state: 'fail'
+                // Check and invalidate backup codes
+                if (!mfa_code && backup_code) {
+
+                    // Validate backup code
+                    if (user.mfa_backup_codes?.includes(backup_code.replace(/-/g, ''))) {
+
+                        // Remove backup codes and disable mfa
+                        await db.user.update({
+                            where: {id: user.id},
+                            data: {
+                                mfa_backup_codes: null,
+                                mfa_activated: false
+                            }
+                        });
+                    } else {
+
+                        // Save login attempt
+                        await db.web_login_attempt.create({
+                            data: {
+                                user: {connect: {id: user.id}},
+                                login_id,
+                                ip_addr: ipAddr,
+                                state: 'fail'
+                            }
+                        });
+
+                        return res.error('Invalid backup code', Status.UNAUTHORIZED, ErrorCode.INVALID_BACKUP_CODE);
                     }
-                });
+                } else if (!mfa_code || !authenticator.check(mfa_code, user.mfa_secret as string)) {
 
-                return res.error('Invalid MFA code.', Status.UNAUTHORIZED, ErrorCode.INVALID_MFA_CODE);
+                    // Save login attempt
+                    await db.web_login_attempt.create({
+                        data: {
+                            user: {connect: {id: user.id}},
+                            login_id,
+                            ip_addr: ipAddr,
+                            state: 'fail'
+                        }
+                    });
+
+                    return res.error('Invalid MFA code.', Status.UNAUTHORIZED, ErrorCode.INVALID_MFA_CODE);
+                }
             }
+
 
             // Create session key and add session
             const token = await secureUid(config.security.tokenSize);
