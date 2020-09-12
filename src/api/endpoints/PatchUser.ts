@@ -91,6 +91,12 @@ export const patchUser = createEndpoint({
 
         // pre-process password
         if (body.password) {
+
+            // Check if the password is the same as the email
+            if (body.password === body.email) {
+                return res.error('Password cannot equal email', Status.BAD_REQUEST, ErrorCode.PASSWORD_EQUALS_PASSWORD);
+            }
+
             body.password = await hash(body.password, config.security.saltRounds);
 
             // Invalidate other sessions

@@ -59,6 +59,11 @@ export const putUser = createEndpoint({
             return res.error('Only administrators can add users.', Status.FORBIDDEN, ErrorCode.NOT_ADMIN);
         }
 
+        // Check if the password is the same as the email
+        if (body.password === body.email) {
+            return res.error('Password cannot equal email', Status.BAD_REQUEST, ErrorCode.PASSWORD_EQUALS_PASSWORD);
+        }
+
         // Hash password
         body.password = await hash(body.password, config.security.saltRounds);
 

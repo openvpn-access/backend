@@ -72,5 +72,6 @@ typings/
 # Misc
 /.psd
 /.logs
+/.test
 
 .DS_Store
